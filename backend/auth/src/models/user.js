@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema({
         required: false,
     },
     forgotPasswordCode: String,
+    loginCode: String,
     verificationCode: String,
     isVerified: { type: Boolean, default: false },
     role: {

@@ -203,8 +203,9 @@ class AuthService {
 
     }
 
-    async changePassword(email, oldPassword, newPassword) {
-        const user = await this.UserRepository.getUserByEmail(email);
+    async changePassword(userId, oldPassword, newPassword) {
+        
+        const user = await this.UserRepository.getUserById(userId);
 
         if (!user) {
             return { success: false, message: "User not found" };
@@ -222,6 +223,49 @@ class AuthService {
 
         return { success: true, message: "Password has been changed successfully" };
 
+    }
+
+    async sendLoginOTP(email) {
+        const user = await this.UserRepository.getUserByEmail(email);
+
+        if (!user) {
+            return { success: false, message: "User not found" };
+        }
+
+        const code = generateCode()
+
+        user.loginCode = code;
+
+        await this.UserRepository.save(user);
+
+        await sendEmail({
+            emailTo: user.email,
+            subject: "Login OTP",
+            code,
+            content: "Use this code to login",
+        })
+
+        return { success: true, message: "Login code sent successfully" };
+    }
+
+    async loginOTP(email, code) {
+        const user = await this.UserRepository.getUserByEmail(email);
+
+        if (!user) {
+            return { success: false, message: "User not found" };
+        }
+
+        if (user.loginCode !== code) {
+            return { success: false, message: "Invalid code" };
+        }
+
+        const token = generateToken(user);
+
+        return {
+            success: true,
+            token,
+            user: { _id: user._id, email: user.email, username: user.username, role: user.role },
+        }
     }
 
     

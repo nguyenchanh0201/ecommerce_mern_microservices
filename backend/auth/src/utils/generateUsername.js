@@ -1,4 +1,5 @@
 const UserRepository = require('../repositories/userRepository')
+const userRepository = new UserRepository();
 
 const generateRandomUsername = async () => {
   let username;
@@ -9,7 +10,7 @@ const generateRandomUsername = async () => {
     const randomString = Math.random().toString(36).substring(2, 8);
     username = `user_${randomString}`;
 
-    const existingUser = await UserRepository.getUserByUsername({ username });
+    const existingUser = await userRepository.getUserByUsername(username);
 
     if (!existingUser) {
       isUnique = true;

@@ -115,9 +115,10 @@ class AuthController {
 
     async changePassword(req, res, next) {
         try {
-            const {email, oldPassword, newPassword} = req.body ; 
+            const {oldPassword, newPassword} = req.body ; 
+            const {_id} = req.user
 
-            const result = await this.AuthService.changePassword(email, oldPassword, newPassword);
+            const result = await this.AuthService.changePassword(_id, oldPassword, newPassword);
             if (!result.success) {
                 return res.status(400).json({
                     success: false,
@@ -134,6 +135,52 @@ class AuthController {
             next(err);
         }
 
+    }
+
+    async sendLoginOTP(req, res, next) {
+        try {
+            const {email} = req.body ; 
+
+            const result = await this.AuthService.sendLoginOTP(email);
+            if (!result.success) {
+                return res.status(400).json({
+                    success: false,
+                    message: result.message
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: result.message 
+            });
+
+        } catch (err) {
+            next(err);
+        }
+
+    }
+
+    async loginOTP(req, res ,next) {
+        try {
+            const {email, code} = req.body ; 
+
+            const result = await this.AuthService.loginOTP(email, code);
+            if (!result.success) {
+                return res.status(400).json({
+                    success: false,
+                    message: result.message
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: result.message,
+                token: result.token 
+            });
+
+        } catch (err) {
+            next(err);
+        }
     }
 
 
