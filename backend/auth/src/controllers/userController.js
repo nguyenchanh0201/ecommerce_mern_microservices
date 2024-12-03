@@ -103,9 +103,70 @@ class UserController {
     //Address
     async addUserAddress(req, res, next){
         try {
-            const userId = 
+            const userId = req.params.id;
+            const address = req.body;
+            const result = await this.UserService.addUserAddress(userId, address);
+
+            if (!result.success) {
+                return res.status(400).json({
+                    success: false,
+                    message: result.message
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: result.message
+            });
+        } catch(err) {
+            next(err)
         }
         
+    }
+
+    async deleteUserAddress(req, res, next){
+        try {
+            const userId = req.params.id;
+            const index = req.params.index;
+            const result = await this.UserService.removeUserAddress(userId, index);
+
+            if (!result.success) {
+                return res.status(400).json({
+                    success: false,
+                    message: result.message
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: result.message
+            });
+        } catch(err) {
+            next(err)
+        }
+    }
+
+    async updateUserAddress(req, res, next){
+        try {
+            const userId = req.params.id;
+            const index = req.params.index;
+            const address = req.body;
+            const result = await this.UserService.updateUserAddress(userId, index, address);
+
+            if (!result.success) {
+                return res.status(400).json({
+                    success: false,
+                    message: result.message
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: result.message
+            });
+        } catch(err) {
+            next(err)
+        }
     }
 
 

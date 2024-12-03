@@ -269,18 +269,8 @@ class AuthService {
     }
 
     
-
-    // async verifyToken(token) {
-    //     try {
-    //         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    //         return decoded;
-    //     } catch (error) {
-    //         throw new Error('Invalid or expired token.');
-    //     }
-    // }
-
-    // async signUpFast(email) {
-    //     const isExisted = await this.UserRepository.getUserByEmail(email);
+    
+    
 
         
 
@@ -288,7 +278,7 @@ class AuthService {
 
 
 
-    // }
+    
 
 
 
