@@ -100,6 +100,14 @@ class UserController {
         }
     }
 
+    //Address
+    async addUserAddress(req, res, next){
+        try {
+            const userId = 
+        }
+        
+    }
+
 
     
 }

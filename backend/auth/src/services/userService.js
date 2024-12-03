@@ -8,7 +8,7 @@ class UserService {
     }
 
     async createUser(user) {
-        const {email, phone, username} = user
+        let {email, phone, username} = user
 
         const isExistEmail = await this.UserRepository.getUserByEmail(email); 
         
@@ -16,17 +16,18 @@ class UserService {
             return {success: false , message: 'Email existed'}
         }
 
-        const isExistPhone = await this.UserRepository.getUserByPhone(phone);
+        const isExistPhone = await this.UserRepository.getUserByPhoneNum(phone);
 
         if (isExistPhone) {
             return {success: false , message : 'Phone number existed'}
         }
 
         if (!username) {
-            username = generateUsername()
-        }
+            username = await generateUsername()
 
-        const newUser = await this.UserRepository.createUser({email, phoneNum: phone, username})
+        }
+        
+        const newUser = await this.UserRepository.createUser({email, phoneNumber: phone, username})
 
         return {success: true , message : newUser};
 
@@ -65,15 +66,67 @@ class UserService {
 
     }
 
-    async updateUser(userId, updateData) {
-        const result = await this.UserRepository.updateUser(userId, updateData)
+    // async updateUser(userId, updateData) {
+    //     const result = await this.UserRepository.updateUser(userId, updateData)
 
-        if (!result) {
-            return {success : false , message : "Update user failed"}
+    //     if (!result) {
+    //         return {success : false , message : "Update user failed"}
+    //     }
+
+    //     return {success : true , message : 'Update user success'};
+
+    // }
+
+    async addUserAddress(userId, address) {
+        const user = await this.UserRepository.getUserById(userId);
+
+        if (!user) {
+            return {success : false , message : "User not found"}
         }
 
-        return {success : true , message : 'Update user success'};
+        user.addresses.push(address);
 
+        await this.UserRepository.save(user);
+
+        return {success : true , message : "Add address success"};
+
+    }
+
+    async removeUserAddress(userId, index) {
+        const user = await this.UserRepository.getUserById(userId);
+
+        if (!user) {
+            return {success : false , message : "User not found"}
+        }
+
+        user.addresses.splice(index, 1);
+
+        await this.UserRepository.save(user);
+
+        return {success : true , message : "Remove address success"};
+
+    }
+
+    async updateUserAddress(userId, index, address) {
+        const user = await this.UserRepository.getUserById(userId);
+
+        if (!user) {
+            return {success : false , message : "User not found"}
+        }
+
+        const {name, street, city, district, ward, phoneNumber, isDefault} = address;
+
+        user.addresses[index].name = name || user.addresses[index].name;
+        user.addresses[index].street = street || user.addresses[index].street;
+        user.addresses[index].city = city || user.addresses[index].city;
+        user.addresses[index].district = district || user.addresses[index].district;
+        user.addresses[index].ward = ward || user.addresses[index].ward;
+        user.addresses[index].phoneNumber = phoneNumber || user.addresses[index].phoneNumber;
+        user.addresses[index].isDefault = isDefault || user.addresses[index].isDefault;
+
+        await this.UserRepository.save(user);
+
+        return {success : true , message : "Update address success"};
     }
     
 

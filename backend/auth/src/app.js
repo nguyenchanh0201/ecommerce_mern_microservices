@@ -2,18 +2,15 @@ const express = require("express");
 const mongoose = require("mongoose");
 const config = require("./config");
 const morgan = require('morgan')
-const authMiddleware = require("./middlewares/authMiddleware");
-const AuthController = require('./controllers/authController')
-const UserController = require('./controllers/userController')
 const {errorHandler} = require('./middlewares')
-const {loginValidator, signupValidator, emailValidator, verifyUserValidator, verifyForgotPassword} = require('./validators/auth')
-const validate = require('./validators/validate'); 
+const AuthRoute = require('./routes/authRoutes')
+const UserRoute = require('./routes/userRoutes')
+
+
 
 class App {
     constructor() {
         this.app = express();
-        this.authController = new AuthController();
-        this.UserController = new UserController();
         this.connectDB();
         this.setMiddlewares();
         this.setRoutes();
@@ -40,17 +37,10 @@ class App {
     }
 
     setRoutes() {
-        this.app.post("/signin", loginValidator, validate, (req, res, next) => this.authController.signIn(req, res, next));
-        this.app.post("/signup", signupValidator, validate, (req, res, next) => this.authController.signUp(req, res, next));
-        this.app.post("/send-email", emailValidator, (req, res, next ) => this.authController.verifyEmail(req, res, next))
-        this.app.post("/verify-email", verifyUserValidator, (req, res, next ) => this.authController.verifyUser(req, res, next))
-        this.app.post("/reset-password", authMiddleware, verifyForgotPassword, validate,  (req, res, next) => this.authController.resetPassword(req, res, next))
-        
+        this.app.use("/auth", AuthRoute)
+
         //User
-        this.app.get("/user", (req, res, next) => this.UserController.getUsers(req, res, next));
-        this.app.get("/user/:id", (req, res, next) => this.UserController.getUserById(req, res, next));
-        this.app.delete("/user/:id", (req, res, next) => this.UserController.deleteUser(req, res, next));
-        this.app.post("/user", (req, res, next) => this.UserController.createUser(req, res, next))
+       this.app.use("/user", UserRoute)
         // this.app.get("/", authMiddleware, (req, res) => res.json({ message: "Welcome to dashboard" }));
     }
 
