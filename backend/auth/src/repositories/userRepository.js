@@ -31,15 +31,6 @@ class UserRepository {
         return await User.findByIdAndDelete({ _id: userId });
     }
 
-    async updateUsername(userId, username) {
-        const updatedUser = await User.findByIdAndUpdate(
-            { _id: userId }, 
-            { username: username }, 
-            { new: true } 
-        );
-
-        return updatedUser; 
-    }
 
     async getUsers() {
         return await User.find();
@@ -49,6 +40,17 @@ class UserRepository {
         return await User.findOne({_id: id})
     }
 
+    async save(user) {
+        return await user.save()
+    }
+
+    async updateUser(userId, updateData) {
+        return await User.findOneAndUpdate(
+            {_id: userId},
+            {$set : updateData},
+            { new: true, runValidators: true }
+        )
+    }
 
     
 }

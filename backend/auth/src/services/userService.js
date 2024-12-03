@@ -4,7 +4,7 @@ const generateUsername = require('../utils/generateUsername')
 class UserService {
     
     constructor() {
-        this.UserRepository = UserRepository;
+        this.UserRepository = new UserRepository()
     }
 
     async createUser(user) {
@@ -34,13 +34,14 @@ class UserService {
     }
 
     async getUsers() {
-        const result =  await this.UserRepository.getUsers();
+        const result = await this.UserRepository.getUsers();
 
         if (!result) {
-            return {success : false , message : 'Users is empty'}
+            return {success : false , message : 'User not found'}
         }
 
-        return result ; 
+        return {success : true , message : result};
+        
     }
 
     async getUserById(userId) {
@@ -64,17 +65,21 @@ class UserService {
 
     }
 
-    async updateUsername(userId, username) {
-        const result =  await this.UserRepository.updateUsername(userId, username)
+    async updateUser(userId, updateData) {
+        const result = await this.UserRepository.updateUser(userId, updateData)
 
         if (!result) {
-            return {success : false , message : "User not found"}
+            return {success : false , message : "Update user failed"}
         }
-        return {success : true , message : result};
+
+        return {success : true , message : 'Update user success'};
+
     }
     
-    
+
 
 
     
 }
+
+module.exports = UserService

@@ -113,7 +113,7 @@ class AuthService {
 
         user.verificationCode = code 
 
-        await user.save()
+        await this.UserRepository.save(user)
 
         await sendEmail({
             emailTo: user.email, 
@@ -142,14 +142,52 @@ class AuthService {
         user.isVerified = true ; 
         user.verificationCode = null ; 
         
-        await user.save();
+        await this.UserRepository.save(user);
 
         return {success: true , message: "User verified successfully"}
 
 
     }
 
-    //Cần phải OTP qua email
+    async sendForgotPassword(email)  {
+        const user = await this.UserRepository.getUserByEmail(email);
+
+        if (!user) {
+            return { success: false, message: "User not found" };
+        }
+
+        const code = generateCode()
+        user.forgotPasswordCode = code;
+
+        await this.UserRepository.save(user);
+
+        await sendEmail({
+            emailTo:user.email , 
+            subject: "Reset your password", 
+            code, 
+            content: "Use this code to reset your password",
+        })
+
+        return { success: true, message: "Reset code sent successfully" };
+    }
+    
+    async verifyResetCode(email, code) {
+        const user = await this.UserRepository.getUserByEmail(email);
+
+        if (!user) {
+            return { success: false, message: "User not found" };
+        }
+
+        if (user.forgotPasswordCode !== code) {
+            return { success: false, message: "Invalid code" };
+        }
+
+        return { success: true, message: "Code verified successfully" };
+    }
+
+
+
+    
     async resetPassword(email, newPassword) {
         const user = await this.UserRepository.getUserByEmail(email);
 
@@ -159,9 +197,30 @@ class AuthService {
 
         const hashedPassword = await hashPwd(newPassword);
         user.password = hashedPassword;
-        await user.save();
+        await this.UserRepository.save(user)
 
         return { success: true, message: "Password has been reset successfully" };
+
+    }
+
+    async changePassword(email, oldPassword, newPassword) {
+        const user = await this.UserRepository.getUserByEmail(email);
+
+        if (!user) {
+            return { success: false, message: "User not found" };
+        }
+
+        const match = await comparePassword(oldPassword, user.password);
+
+        if (!match) {
+            return { success: false, message: "Invalid password" }
+        }
+
+        const hashedPassword = await hashPwd(newPassword);
+        user.password = hashedPassword;
+        await this.UserRepository.save(user)
+
+        return { success: true, message: "Password has been changed successfully" };
 
     }
 

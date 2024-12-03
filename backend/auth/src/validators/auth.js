@@ -27,5 +27,11 @@ const verifyForgotPassword = [
     check("newPassword").isLength({min : 8}).withMessage('Password must be 8 characters long').notEmpty().withMessage('Repeat password is required')
 ]
 
+const changePasswordValidator = [
+    check("email").isEmail().withMessage("Invalid email").notEmpty().withMessage("Email is required"),
+    check("oldPassword").isLength({min : 8}).withMessage('Password must be 8 characters long').notEmpty().withMessage('Old password is required'),
+    check("newPassword").isLength({min : 8}).withMessage('Password must be 8 characters long').notEmpty().withMessage('New password is required')
+]
+
 
 module.exports = {loginValidator, signupValidator, emailValidator, verifyUserValidator, verifyForgotPassword}
