@@ -7,6 +7,9 @@ class UserController {
         this.UserService = new UserService()
     }
 
+
+    //Admin only
+
     async createUser(req, res, next) {
         try {
             const user = req.body 
@@ -100,6 +103,8 @@ class UserController {
         }
     }
 
+    
+
     //Address
     async addUserAddress(req, res, next){
         try {
@@ -168,8 +173,6 @@ class UserController {
             next(err)
         }
     }
-
-
     
 }
 

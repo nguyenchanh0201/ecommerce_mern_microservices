@@ -44,14 +44,7 @@ class UserRepository {
         return await user.save()
     }
 
-    async updateUser(userId, updateData) {
-        return await User.findOneAndUpdate(
-            {_id: userId},
-            {$set : updateData},
-            { new: true, runValidators: true }
-        )
-    }
-
+    
     
 }
 

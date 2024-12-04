@@ -58,9 +58,7 @@ class AuthService {
         }
     }
 
-    async signInByFacebook() {
-
-    }
+    
 
     async signUp(credentials) {
 
@@ -271,12 +269,122 @@ class AuthService {
     
     
     
+    async addUserAddress(userId, address) {
+        const user = await this.UserRepository.getUserById(userId);
 
+        if (!user) {
+            return {success : false , message : "User not found"}
+        }
+
+        user.addresses.push(address);
+
+        await this.UserRepository.save(user);
+
+        return {success : true , message : "Add address success"};
+
+    }
+
+    async removeUserAddress(userId, index) {
+        const user = await this.UserRepository.getUserById(userId);
+
+        if (!user) {
+            return {success : false , message : "User not found"}
+        }
+
+        user.addresses.splice(index, 1);
+
+        await this.UserRepository.save(user);
+
+        return {success : true , message : "Remove address success"};
+
+    }
+
+    async updateUserAddress(userId, index, address) {
+        const user = await this.UserRepository.getUserById(userId);
+
+        if (!user) {
+            return {success : false , message : "User not found"}
+        }
+
+        const {name, street, city, district, ward, phoneNumber, isDefault} = address;
+
+        user.addresses[index].name = name || user.addresses[index].name;
+        user.addresses[index].street = street || user.addresses[index].street;
+        user.addresses[index].city = city || user.addresses[index].city;
+        user.addresses[index].district = district || user.addresses[index].district;
+        user.addresses[index].ward = ward || user.addresses[index].ward;
+        user.addresses[index].phoneNumber = phoneNumber || user.addresses[index].phoneNumber;
+        user.addresses[index].isDefault = isDefault || user.addresses[index].isDefault;
+
+        await this.UserRepository.save(user);
+
+        return {success : true , message : "Update address success"};
+    }
+
+
+    async updateUser(userId, updateData) {
+        const user = await this.UserRepository.getUserById(userId);
+
+        if (!user) {
+            return {success : false , message : "User not found"}
+        }
+
+        const {username, phoneNumber, name} = updateData;
+
+        const isExistUsername = await this.UserRepository.getUserByUsername(username);
+
+        if (isExistUsername) {
+            return {success : false , message : "Username existed"}
+        }
+
+        const isExistPhone = await this.UserRepository.getUserByPhoneNum(phoneNumber);
+
+        if (isExistPhone) {
+            return {success : false , message : "Phone number existed"}
+        }
+
+        user.username = username || user.username;
+        user.phoneNumber = phoneNumber || user.phoneNumber;
+        user.name = name || user.name;
+
+        await this.UserRepository.save(user);
+
+        return {success : true , message : "Update user success"};
+
+    }
         
 
-        
+    async getUserProfile(userId) {
+        const user = await this.UserRepository.getUserById(userId);
+
+        if (!user) {
+            return {success : false , message : "User not found"}
+        }
+
+        return {success : true , user}
+    }
 
 
+
+    async getUserAddresses(userId) {
+        const user = await this.UserRepository.getUserById(userId);
+
+        if (!user) {
+            return {success : false , message : "User not found"}
+        }
+
+        return {success : true , addresses: user.addresses}
+    }
+
+    async getUserAddress(userId, index) {
+        const user = await this.UserRepository.getUserById(userId);
+
+        if (!user) {
+            return {success : false , message : "User not found"}
+        }
+
+        return {success : true , address: user.addresses[index]}
+    }
 
     
 

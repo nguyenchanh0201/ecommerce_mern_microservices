@@ -55,11 +55,7 @@ router.get(
   async function (req, res) {
     try {
       const user = req.user;  
-      const token = generateToken({
-        id: user.facebookId,  
-        username: user.username,
-        name: user.name,
-      });
+      const token = generateToken(user);
 
       console.log('Token generated:', token);
       

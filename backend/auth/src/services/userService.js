@@ -66,16 +66,36 @@ class UserService {
 
     }
 
-    // async updateUser(userId, updateData) {
-    //     const result = await this.UserRepository.updateUser(userId, updateData)
+    async updateUser(userId, updateData) {
+        const user = await this.UserRepository.getUserById(userId);
 
-    //     if (!result) {
-    //         return {success : false , message : "Update user failed"}
-    //     }
+        if (!user) {
+            return {success : false , message : "User not found"}
+        }
 
-    //     return {success : true , message : 'Update user success'};
+        const {username, phoneNumber, name} = updateData;
 
-    // }
+        const isExistUsername = await this.UserRepository.getUserByUsername(username);
+
+        if (isExistUsername) {
+            return {success : false , message : "Username existed"}
+        }
+
+        const isExistPhone = await this.UserRepository.getUserByPhoneNum(phoneNumber);
+
+        if (isExistPhone) {
+            return {success : false , message : "Phone number existed"}
+        }
+
+        user.username = username || user.username;
+        user.phoneNumber = phoneNumber || user.phoneNumber;
+        user.name = name || user.name;
+
+        await this.UserRepository.save(user);
+
+        return {success : true , message : "Update user success"};
+
+    }
 
     async addUserAddress(userId, address) {
         const user = await this.UserRepository.getUserById(userId);
