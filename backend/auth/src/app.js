@@ -5,6 +5,7 @@ const morgan = require('morgan')
 const {errorHandler} = require('./middlewares')
 const AuthRoute = require('./routes/authRoutes')
 const UserRoute = require('./routes/userRoutes')
+const facebookAuth = require('./routes/facebookAuthRoutes')
 
 
 
@@ -38,7 +39,7 @@ class App {
 
     setRoutes() {
         this.app.use("/auth", AuthRoute)
-
+        this.app.use("/auth/facebook", facebookAuth)
         //User
        this.app.use("/user", UserRoute)
         // this.app.get("/", authMiddleware, (req, res) => res.json({ message: "Welcome to dashboard" }));
