@@ -31,6 +31,19 @@ class ProductRepository {
         return await product.save()
     }
 
+    async getProductByName(productName) {
+        return await Product.find({
+            productName: { $regex: productName.trim(), $options: 'i' }
+        });
+    }
+
+    async getProductByCategory(category) {
+        return await Product.find({
+            category: { $regex: category.trim(), $options: 'i' }
+        });
+    }
+
+    
 }
 
 module.exports = ProductRepository;

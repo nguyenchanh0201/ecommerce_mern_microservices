@@ -92,6 +92,165 @@ class ProductService {
 
         return { success : true, data : result };
     }
+
+
+    async updateProductSpecifications(id, specifications) {
+        const product = await this.ProductRepository.getProductById(id);
+
+        if (!product) {
+            return { success : false, message : 'Product not found' };
+        }
+
+        product.specifications.CPU = specifications.CPU || product.specifications.CPU;
+        product.specifications.ram = specifications.RAM || product.specifications.ram;
+        product.specifications.VGA = specifications.VGA || product.specifications.VGA;
+        product.specifications.SSD = specifications.SSD || product.specifications.SSD;
+        product.specifications.battery = specifications.battery || product.specifications.battery;
+        product.specifications.operating_system = specifications.operating_system || product.specifications.operating_system;
+
+        const result = await this.ProductRepository.save(product);
+
+        if (!result) {
+            return { success : false, message : 'Failed to update specifications' };
+        }
+
+        return { success : true, data : result };
+    }
+
+
+    async addProductReview(productId, review) {
+        const product = await this.ProductRepository.getProductById(productId);
+
+        if (!product) {
+            return { success : false, message : 'Product not found' };
+        }
+
+        product.reviews.push(review);
+
+        const result = await this.ProductRepository.save(product);
+
+        if (!result) {
+            return { success : false, message : 'Failed to add review' };
+        }
+
+        return { success : true, data : result };
+    }
+
+
+    async deleteProductReview(id, index) {
+        const product = await this.ProductRepository.getProductById(id);
+
+        if (!product) {
+            return { success : false, message : 'Product not found' };
+        }
+
+        product.reviews.splice(index, 1);
+
+        const result = await this.ProductRepository.save(product);
+
+        if (!result) {
+            return { success : false, message : 'Failed to delete review' };
+        }
+
+        return { success : true, data : result };
+    }
+
+
+    async getProductByName(name) {
+        const result = await this.ProductRepository.getProductByName(name);
+
+        if (!result) {
+            return { success : false, message : 'No product found' };
+        }
+
+        return { success : true, data : result };
+    }
+
+    async getProductByCategory(category) {
+        const result = await this.ProductRepository.getProductByCategory(category);
+
+        if (!result) {
+            return { success : false, message : 'No product found' };
+        }
+
+        return { success : true, data : result };
+    }
+
+    async editVariant(id, variants) {
+        const product = await this.ProductRepository.getProductById(id);
+
+        if (!product) {
+            return { success : false, message : 'Product not found' };
+        }
+
+        product.variants.price = variants.price || product.variants.price;
+        product.variants.color = variants.color || product.variants.color;
+        product.variants.size = variants.size || product.variants.size;
+        product.variants.stock = variants.stock || product.variants.stock;
+
+        const result = await this.ProductRepository.save(product);
+
+        if (!result) {
+            return { success : false, message : 'Failed to update variants' };
+        }
+
+        return { success : true, data : result };
+    }
+
+    async addVariant(id, variant) {
+        const product = await this.ProductRepository.getProductById(id);
+
+        if (!product) {
+            return { success : false, message : 'Product not found' };
+        }
+
+        product.variants.push(variant);
+
+        const result = await this.ProductRepository.save(product);
+
+        if (!result) {
+            return { success : false, message : 'Failed to add variant' };
+        }
+
+        return { success : true, data : result };
+    }
+
+    async deleteVariant(id, index) {
+        const product = await this.ProductRepository.getProductById(id);
+
+        if (!product) {
+            return { success : false, message : 'Product not found' };
+        }
+
+        product.variants.splice(index, 1);
+
+        const result = await this.ProductRepository.save(product);
+
+        if (!result) {
+            return { success : false, message : 'Failed to delete variant' };
+        }
+
+        return { success : true, data : result };
+    }
+
+    async updateStock(id, stock) {
+        const product = await this.ProductRepository.getProductById(id);
+
+        if (!product) {
+            return { success : false, message : 'Product not found' };
+        }
+
+        product.stock = stock || product.stock;
+
+        const result = await this.ProductRepository.save(product);
+
+        if (!result) {
+            return { success : false, message : 'Failed to update stock' };
+        }
+
+        return { success : true, data : result };
+    }
+    
 }
 
 
