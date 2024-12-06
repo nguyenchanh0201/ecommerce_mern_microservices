@@ -87,23 +87,23 @@ const getCartAmount = () => {
 };
 
 const applyCoupon = (code) => {
-  // Giả sử đây là danh sách mã giảm giá hợp lệ
   const validCoupons = {
-    SAVE10: 10, // Giảm 10 đơn vị tiền tệ
-    SAVE20: 20, // Giảm 20 đơn vị tiền tệ
-    PERCENT15: "15%", // Giảm 15% tổng tiền
+    KIETCHANH: "20%", // Discount 20% 
+    KIET20: 20, // OFF 20
+    CHANH20: 20, // OFF 20
+
   };
 
   if (validCoupons[code]) {
     setCouponCode(code);
 
-    // Kiểm tra kiểu giảm giá
+    // Check the discount style
     if (typeof validCoupons[code] === "string" && validCoupons[code].endsWith("%")) {
       const percent = parseFloat(validCoupons[code].replace("%", ""));
       const subtotal = getCartAmount();
-      setDiscount((subtotal * percent) / 100); // Giảm giá theo phần trăm
+      setDiscount((subtotal * percent) / 100); // Discount by percentage
     } else {
-      setDiscount(validCoupons[code]); // Giảm giá cố định
+      setDiscount(validCoupons[code]); // Discount by fixed amount
     }
 
     alert(`Coupon applied! Discount: ${validCoupons[code]}`);
