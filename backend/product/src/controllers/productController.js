@@ -21,8 +21,7 @@ class ProductController {
 
     async getProductPaginate(req, res, next) {
         try {
-            const { page} = req.query;
-            const limit = 10 ; 
+            const { page, limit} = req.query;
             const result = await this.ProductService.getProductPaginate(page, limit);
             if (!result.success) {
                 return res.status(404).json(result);
@@ -105,8 +104,8 @@ class ProductController {
 
     async deleteReview(req, res, next) {
         try {
-            const {id, index} = req.params;
-            const result = await this.ProductService.deleteProductReview(id, index);
+            const {id, reviewId} = req.params;
+            const result = await this.ProductService.deleteProductReview(id, reviewId);
             if (!result.success) {
                 return res.status(400).json(result);
             }
@@ -119,18 +118,18 @@ class ProductController {
 
     async searchProduct(req, res, next) {
         try {
-            const { nameOrCategory } = req.query;
+            const { nameOrCategory, page, limit } = req.query;
     
             if (!nameOrCategory) {
                 return res.status(400).json({ success: false, message: 'Query parameter is required' });
             }
     
             
-            const result = await this.ProductService.getProductByName(nameOrCategory);
+            const result = await this.ProductService.getProductByName(nameOrCategory, page, limit);
     
             
             if (!result || result.length === 0) {
-                const resultCategory = await this.ProductService.getProductByCategory(nameOrCategory);
+                const resultCategory = await this.ProductService.getProductByCategory(nameOrCategory, page, limit);
     
                 if (!resultCategory || resultCategory.length === 0) {
                     return res.status(404).json({ success: false, message: 'No product found' });
@@ -179,9 +178,10 @@ class ProductController {
 
     async editVariant(req, res, next) {
         try {
-            const {id} = req.params;
+            const {id, variantId} = req.params;
+            
             const variant = req.body;
-            const result = await this.ProductService.editVariant(id, variant);
+            const result = await this.ProductService.editVariant(id, variantId, variant);
             if (!result.success) {
                 return res.status(400).json(result);
             }
@@ -193,8 +193,8 @@ class ProductController {
 
     async deleteVariant(req, res, next) {
         try {
-            const {id, index} = req.params;
-            const result = await this.ProductService.deleteVariant(id, index);
+            const {id, variantId} = req.params;
+            const result = await this.ProductService.deleteVariant(id, variantId);
             if (!result.success) {
                 return res.status(400).json(result);
             }

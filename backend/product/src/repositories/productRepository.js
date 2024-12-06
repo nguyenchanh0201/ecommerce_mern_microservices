@@ -31,16 +31,38 @@ class ProductRepository {
         return await product.save()
     }
 
-    async getProductByName(productName) {
-        return await Product.find({
-            productName: { $regex: productName.trim(), $options: 'i' }
-        });
+    async getProductByName(productName, page, limit) {
+        const skip = (page - 1) * limit;
+    
+        const [results, total] = await Promise.all([
+            Product.find({
+                productName: { $regex: productName.trim(), $options: 'i' }
+            })
+                .skip(skip)
+                .limit(limit),
+            Product.countDocuments({
+                productName: { $regex: productName.trim(), $options: 'i' }
+            })
+        ]);
+    
+        return { results, total };
     }
 
-    async getProductByCategory(category) {
-        return await Product.find({
-            category: { $regex: category.trim(), $options: 'i' }
-        });
+    async getProductByCategory(category, page, limit) {
+        const skip = (page - 1) * limit;
+    
+        const [results, total] = await Promise.all([
+            Product.find({
+                category: { $regex: category.trim(), $options: 'i' }
+            })
+                .skip(skip)
+                .limit(limit),
+            Product.countDocuments({
+                category: { $regex: category.trim(), $options: 'i' }
+            })
+        ]);
+    
+        return { results, total };
     }
 
     
