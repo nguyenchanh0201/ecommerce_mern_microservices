@@ -12,6 +12,8 @@ const [search, setSearch] = useState("");
 const [showSearch, setShowSearch] = useState(true);
 const [cartItems,setCartItems] = useState([]);
 const navigate  = useNavigate();
+const [couponCode, setCouponCode] = useState("");
+const [discount, setDiscount] = useState(0);
 
 
 const addToCart = async (itemId) => {
@@ -84,6 +86,33 @@ const getCartAmount = () => {
   return totalAmount || 0; 
 };
 
+const applyCoupon = (code) => {
+  // Giả sử đây là danh sách mã giảm giá hợp lệ
+  const validCoupons = {
+    SAVE10: 10, // Giảm 10 đơn vị tiền tệ
+    SAVE20: 20, // Giảm 20 đơn vị tiền tệ
+    PERCENT15: "15%", // Giảm 15% tổng tiền
+  };
+
+  if (validCoupons[code]) {
+    setCouponCode(code);
+
+    // Kiểm tra kiểu giảm giá
+    if (typeof validCoupons[code] === "string" && validCoupons[code].endsWith("%")) {
+      const percent = parseFloat(validCoupons[code].replace("%", ""));
+      const subtotal = getCartAmount();
+      setDiscount((subtotal * percent) / 100); // Giảm giá theo phần trăm
+    } else {
+      setDiscount(validCoupons[code]); // Giảm giá cố định
+    }
+
+    alert(`Coupon applied! Discount: ${validCoupons[code]}`);
+  } else {
+    setCouponCode("");
+    setDiscount(0);
+    alert("Invalid coupon code!");
+  }
+};
 
 
 
@@ -100,7 +129,12 @@ const value = {
     getCartCount,
     updateQuantity,
     getCartAmount,
-    navigate
+    navigate,
+    couponCode,
+    setCouponCode,
+    discount,
+    setDiscount,
+    applyCoupon,
   };
   
   return (
