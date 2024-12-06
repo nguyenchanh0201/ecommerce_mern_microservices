@@ -1,4 +1,5 @@
 const ProductRepository = require('../repositories/productRepository');
+const calculateAverage = require('../utils/calculateAverage');
 
 class ProductService {
 
@@ -129,6 +130,7 @@ class ProductService {
         }
 
         product.reviews.push(review);
+        calculateAverage(product);
 
         const result = await this.ProductRepository.save(product);
 
@@ -149,6 +151,7 @@ class ProductService {
 
         product.reviews.splice(index, 1);
 
+        calculateAverage(product);
         const result = await this.ProductRepository.save(product);
 
         if (!result) {
@@ -253,6 +256,44 @@ class ProductService {
 
         return { success : true, data : result };
     }
+
+    async addTags(productId, tags) {
+        // Fetch the product by ID
+        const product = await this.ProductRepository.getProductById(productId);
+        
+        
+        // Check if the product exists
+        if (!product) {
+            return { success: false, message: 'Product not found' };
+        }
+    
+        // Ensure `tags` is an array
+        console.log(tags)
+        if (!Array.isArray(tags)) {
+            return { success: false, message: 'Tags should be an array' };
+        }
+    
+        // Add new tags to the product's tags array (avoid duplicates)
+        const existingTags = new Set(product.tags);
+        for (const tag of tags) {
+            if (!existingTags.has(tag)) {
+                product.tags.push(tag);
+            }
+        }
+    
+        // Save the updated product
+        const result = await this.ProductRepository.save(product);
+    
+        // Check if save was successful
+        if (!result) {
+            return { success: false, message: 'Failed to add tags' };
+        }
+    
+        return { success: true, data: result };
+    }
+
+    
+    
     
 }
 

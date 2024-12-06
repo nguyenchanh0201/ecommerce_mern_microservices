@@ -93,7 +93,7 @@ class ProductController {
         try {
             const { id } = req.params;
             const review = req.body;
-            const result = await this.ProductService.addReview(id, review);
+            const result = await this.ProductService.addProductReview(id, review);
             if (!result.success) {
                 return res.status(400).json(result);
             }
@@ -106,7 +106,7 @@ class ProductController {
     async deleteReview(req, res, next) {
         try {
             const {id, index} = req.params;
-            const result = await this.ProductService.deleteReview(id, index);
+            const result = await this.ProductService.deleteProductReview(id, index);
             if (!result.success) {
                 return res.status(400).json(result);
             }
@@ -207,8 +207,8 @@ class ProductController {
     async addTag(req, res, next) {
         try {
             const {id} = req.params;
-            const tag = req.body;
-            const result = await this.ProductService.addTag(id, tag);
+            const {tags} = req.body;
+            const result = await this.ProductService.addTags(id, tags);
             if (!result.success) {
                 return res.status(400).json(result);
             }
