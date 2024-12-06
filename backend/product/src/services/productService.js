@@ -101,8 +101,11 @@ class ProductService {
             return { success : false, message : 'Product not found' };
         }
 
+        const {ram, CPU, VGA, SSD, battery, operating_system} = specifications;
+        
+        product.specifications.ram = specifications.ram || product.specifications.ram;
         product.specifications.CPU = specifications.CPU || product.specifications.CPU;
-        product.specifications.ram = specifications.RAM || product.specifications.ram;
+        
         product.specifications.VGA = specifications.VGA || product.specifications.VGA;
         product.specifications.SSD = specifications.SSD || product.specifications.SSD;
         product.specifications.battery = specifications.battery || product.specifications.battery;

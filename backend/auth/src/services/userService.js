@@ -112,14 +112,20 @@ class UserService {
 
     }
 
-    async removeUserAddress(userId, index) {
+    async removeUserAddress(userId, addressId) {
         const user = await this.UserRepository.getUserById(userId);
 
         if (!user) {
             return {success : false , message : "User not found"}
         }
 
-        user.addresses.splice(index, 1);
+        const address = user.addresses.id(addressId);
+
+        if (!address) {
+            return { success: false, message: "Address not found" };
+        }
+
+        address.remove();
 
         await this.UserRepository.save(user);
 

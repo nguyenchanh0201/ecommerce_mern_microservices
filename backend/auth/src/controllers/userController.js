@@ -132,8 +132,8 @@ class UserController {
     async deleteUserAddress(req, res, next){
         try {
             const userId = req.params.id;
-            const index = req.params.index;
-            const result = await this.UserService.removeUserAddress(userId, index);
+            const index = req.params.addressId;
+            const result = await this.UserService.removeUserAddress(userId, addressId);
 
             if (!result.success) {
                 return res.status(400).json({

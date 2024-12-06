@@ -153,7 +153,7 @@ class ProductController {
         try {
             const {id} = req.params;
             const {specification} = req.body;
-            const result = await this.ProductService.editSpecification(id, specification);
+            const result = await this.ProductService.updateProductSpecifications(id, specification);
             if (!result.success) {
                 return res.status(400).json(result);
             }

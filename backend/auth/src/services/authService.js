@@ -58,21 +58,21 @@ class AuthService {
         }
     }
 
-    
+
 
     async signUp(credentials) {
 
         try {
-            const {email, phoneNumber, username, password} = credentials ; 
+            const { email, phoneNumber, username, password } = credentials;
 
             const isExisted = await this.UserRepository.getUserByEmail(email);
 
             if (isExisted) {
-                return {success: false , message: "Email existed"}
+                return { success: false, message: "Email existed" }
             }
 
             const hashedPassword = await hashPwd(password);
-            const newUser = {email, phoneNumber, username, password: hashedPassword, facebookId: null} ; 
+            const newUser = { email, phoneNumber, username, password: hashedPassword, facebookId: null };
 
 
             const createdUser = await this.UserRepository.createUser(newUser);
@@ -86,68 +86,68 @@ class AuthService {
 
         }
 
-        catch(error) {
+        catch (error) {
             console.error('Error during signUp:', error);
-            return { success: false, message: 'Something went wrong. Please try again later.' }; 
+            return { success: false, message: 'Something went wrong. Please try again later.' };
         }
-        
 
-        
+
+
     }
 
     async verifyEmail(email) {
-        
+
         const user = await this.UserRepository.getUserByEmail(email);
 
         if (!user) {
-            return {success: false, message: "User not found"}
+            return { success: false, message: "User not found" }
         }
 
         if (user.isVerified) {
-            return {success: false, message: "User has been verified" }
+            return { success: false, message: "User has been verified" }
         }
 
         const code = generateCode()
 
-        user.verificationCode = code 
+        user.verificationCode = code
 
         await this.UserRepository.save(user)
 
         await sendEmail({
-            emailTo: user.email, 
+            emailTo: user.email,
             subject: "Email verification code",
             code,
             content: "verify your account",
         })
 
-        return {success: true, message: "User email verification sent successfully"}
+        return { success: true, message: "User email verification sent successfully" }
 
 
-        
+
     }
 
     async verifyUser(email, code) {
         const user = await this.UserRepository.getUserByEmail(email);
 
         if (!user) {
-            return {success: false, message: "User not found"}
+            return { success: false, message: "User not found" }
         }
 
         if (user.verificationCode !== code) {
-            return {success: false, message: "Invalid code" }
+            return { success: false, message: "Invalid code" }
         }
 
-        user.isVerified = true ; 
-        user.verificationCode = null ; 
-        
+        user.isVerified = true;
+        user.verificationCode = null;
+
         await this.UserRepository.save(user);
 
-        return {success: true , message: "User verified successfully"}
+        return { success: true, message: "User verified successfully" }
 
 
     }
 
-    async sendForgotPassword(email)  {
+    async sendForgotPassword(email) {
         const user = await this.UserRepository.getUserByEmail(email);
 
         if (!user) {
@@ -160,15 +160,15 @@ class AuthService {
         await this.UserRepository.save(user);
 
         await sendEmail({
-            emailTo:user.email , 
-            subject: "Reset your password", 
-            code, 
+            emailTo: user.email,
+            subject: "Reset your password",
+            code,
             content: "Use this code to reset your password",
         })
 
         return { success: true, message: "Reset code sent successfully" };
     }
-    
+
     async verifyResetCode(email, code) {
         const user = await this.UserRepository.getUserByEmail(email);
 
@@ -185,7 +185,7 @@ class AuthService {
 
 
 
-    
+
     async resetPassword(email, newPassword) {
         const user = await this.UserRepository.getUserByEmail(email);
 
@@ -202,7 +202,7 @@ class AuthService {
     }
 
     async changePassword(userId, oldPassword, newPassword) {
-        
+
         const user = await this.UserRepository.getUserById(userId);
 
         if (!user) {
@@ -266,59 +266,73 @@ class AuthService {
         }
     }
 
-    
-    
-    
+
+
+
     async addUserAddress(userId, address) {
         const user = await this.UserRepository.getUserById(userId);
 
         if (!user) {
-            return {success : false , message : "User not found"}
+            return { success: false, message: "User not found" }
         }
 
         user.addresses.push(address);
 
         await this.UserRepository.save(user);
 
-        return {success : true , message : "Add address success"};
+        return { success: true, message: "Add address success" };
 
     }
 
-    async removeUserAddress(userId, index) {
+    async removeUserAddress(userId, addressId) {
         const user = await this.UserRepository.getUserById(userId);
 
         if (!user) {
-            return {success : false , message : "User not found"}
+            return { success: false, message: "User not found" }
         }
 
-        user.addresses.splice(index, 1);
+        const originalLength = user.addresses.length;
+        user.addresses = user.addresses.filter(
+            (address) => address._id.toString() !== addressId
+        );
+
+        if (user.addresses.length === originalLength) {
+            return { success: false, message: "Address not found" };
+        }
 
         await this.UserRepository.save(user);
 
-        return {success : true , message : "Remove address success"};
+        return { success: true, message: "Remove address success" };
 
     }
 
-    async updateUserAddress(userId, index, address) {
+    async updateUserAddress(userId, addressId, address) {
         const user = await this.UserRepository.getUserById(userId);
 
         if (!user) {
-            return {success : false , message : "User not found"}
+            return { success: false, message: "User not found" }
         }
 
-        const {name, street, city, district, ward, phoneNumber, isDefault} = address;
+        const { name, street, city, district, ward, phoneNumber, isDefault } = address;
 
-        user.addresses[index].name = name || user.addresses[index].name;
-        user.addresses[index].street = street || user.addresses[index].street;
-        user.addresses[index].city = city || user.addresses[index].city;
-        user.addresses[index].district = district || user.addresses[index].district;
-        user.addresses[index].ward = ward || user.addresses[index].ward;
-        user.addresses[index].phoneNumber = phoneNumber || user.addresses[index].phoneNumber;
-        user.addresses[index].isDefault = isDefault || user.addresses[index].isDefault;
+        const userAddress = user.addresses.id(addressId);
+        if (!userAddress) {
+            return { success: false, message: "Address not found" };
+        }
+
+        // Update fields with nullish coalescing operator
+        userAddress.name = name ?? userAddress.name;
+        userAddress.street = street ?? userAddress.street;
+        userAddress.city = city ?? userAddress.city;
+        userAddress.district = district ?? userAddress.district;
+        userAddress.ward = ward ?? userAddress.ward;
+        userAddress.phoneNumber = phoneNumber ?? userAddress.phoneNumber;
+        userAddress.isDefault = isDefault ?? userAddress.isDefault;
+
 
         await this.UserRepository.save(user);
 
-        return {success : true , message : "Update address success"};
+        return { success: true, message: "Update address success" };
     }
 
 
@@ -326,21 +340,21 @@ class AuthService {
         const user = await this.UserRepository.getUserById(userId);
 
         if (!user) {
-            return {success : false , message : "User not found"}
+            return { success: false, message: "User not found" }
         }
 
-        const {username, phoneNumber, name} = updateData;
+        const { username, phoneNumber, name } = updateData;
 
         const isExistUsername = await this.UserRepository.getUserByUsername(username);
 
         if (isExistUsername) {
-            return {success : false , message : "Username existed"}
+            return { success: false, message: "Username existed" }
         }
 
         const isExistPhone = await this.UserRepository.getUserByPhoneNum(phoneNumber);
 
         if (isExistPhone) {
-            return {success : false , message : "Phone number existed"}
+            return { success: false, message: "Phone number existed" }
         }
 
         user.username = username || user.username;
@@ -349,19 +363,19 @@ class AuthService {
 
         await this.UserRepository.save(user);
 
-        return {success : true , message : "Update user success"};
+        return { success: true, message: "Update user success" };
 
     }
-        
+
 
     async getUserProfile(userId) {
         const user = await this.UserRepository.getUserById(userId);
 
         if (!user) {
-            return {success : false , message : "User not found"}
+            return { success: false, message: "User not found" }
         }
 
-        return {success : true , user}
+        return { success: true, user }
     }
 
 
@@ -370,23 +384,25 @@ class AuthService {
         const user = await this.UserRepository.getUserById(userId);
 
         if (!user) {
-            return {success : false , message : "User not found"}
+            return { success: false, message: "User not found" }
         }
 
-        return {success : true , addresses: user.addresses}
+        return { success: true, addresses: user.addresses }
     }
 
-    async getUserAddress(userId, index) {
+    async getUserAddress(userId, addressId) {
         const user = await this.UserRepository.getUserById(userId);
 
         if (!user) {
-            return {success : false , message : "User not found"}
+            return { success: false, message: "User not found" }
         }
 
-        return {success : true , address: user.addresses[index]}
+        const address = user.addresses.id(addressId);
+
+        return { success: true, address: address }
     }
 
-    
+
 
 
 

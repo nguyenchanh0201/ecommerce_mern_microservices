@@ -260,9 +260,9 @@ class AuthController {
     async deleteAddress(req, res, next) {
         try {
             const { _id } = req.user;
-            const index = req.params.index;
+            const addressId = req.params.addressId;
 
-            const result = await this.AuthService.removeUserAddress(_id, index);
+            const result = await this.AuthService.removeUserAddress(_id, addressId);
 
             if (!result){
                 return res.status(400).json({
@@ -283,10 +283,10 @@ class AuthController {
     async updateAddress(req, res, next) {
         try {
             const { _id } = req.user;
-            const index = req.params.index;
+            const addressId = req.params.addressId ; 
             const address = req.body;
 
-            const result = await this.AuthService.updateUserAddress(_id, index, address);
+            const result = await this.AuthService.updateUserAddress(_id, addressId, address);
 
             if (!result){
                 return res.status(400).json({
@@ -328,9 +328,10 @@ class AuthController {
     async getUserAddress (req, res, next) {
         try {
             const { _id } = req.user;
-            const index = req.params.index;
+            const id = req.params.id;
+            const addressId = req.params.addressId;
 
-            const result = await this.AuthService.getUserAddress(_id, index);
+            const result = await this.AuthService.getUserAddress(_id, addressId);
 
             if (!result){
                 return res.status(400).json({

@@ -1,5 +1,17 @@
 const mongoose = require('mongoose');
 
+// Define the Address Schema
+const addressSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    street: { type: String, required: true },
+    city: { type: String, required: true },
+    district: { type: String, required: true },
+    ward: { type: String, required: true },
+    phoneNumber: { type: String, required: true },
+    isDefault: { type: Boolean, default: false },
+});
+
+// Define the User Schema
 const userSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -36,17 +48,7 @@ const userSchema = new mongoose.Schema({
         type: Number,
         default: 2, // 1 for admin, 2 for user
     },
-    
-    
-    addresses: [{
-        name: { type: String, required: true },
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        district: { type: String, required: true },
-        ward: { type: String, required: true },
-        phoneNumber: { type: String, required: true },
-        isDefault: { type: Boolean, default: false }
-    }]
+    addresses: [addressSchema], // Use addressSchema here
 }, { timestamps: true });
 
 // Ensure that the virtual field id is returned as a string instead of _id
@@ -58,6 +60,7 @@ userSchema.set('toJSON', {
     virtuals: true,
 });
 
+// Create Models
 const User = mongoose.model('User', userSchema);
 
-module.exports = User;
+module.exports =  User 

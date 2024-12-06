@@ -11,7 +11,7 @@ class UserRepository {
     }
 
     async getUserByEmail(email) {
-        return await User.findOne({ email });
+        return await User.findOne({ email: email });
     }
 
     async getUserByPhoneNum(phone) {
@@ -43,6 +43,8 @@ class UserRepository {
     async save(user) {
         return await user.save()
     }
+
+    
 
     
     
