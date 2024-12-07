@@ -1,7 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const config = require("./config");
-// const MessageBroker = require("./utils/messageBroker");
+const MessageBroker = require("./utils/messageBroker");
 const productsRoutes = require("./routes/productRoutes");
 require("dotenv").config();
 const {errorHandler} = require('./middlewares');
@@ -13,7 +13,7 @@ class App {
     this.connectDB();
     this.setMiddlewares();
     this.setRoutes();
-    // this.setupMessageBroker();
+    this.setupMessageBroker();
   }
 
   async connectDB() {
@@ -37,7 +37,7 @@ class App {
   }
 
   setRoutes() {
-    this.app.use("/api/products", productsRoutes);
+    this.app.use("/", productsRoutes);
   }
 
   setupMessageBroker() {
