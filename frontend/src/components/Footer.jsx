@@ -24,9 +24,8 @@ const Footer = () => {
             <ul className="flex flex-col gap-2 text-gray-600">
                 <li className="text-base">Address: Ton Duc Thang University, 19 Đ. Nguyễn Hữu Thọ, Tân Hưng, Quận 7, Hồ Chí Minh, Vietnam</li>
                 <li className="text-base">Phone: +123 456 7890</li>
-                <li className="text-base">Email: 522h0058@student.tdtu.edu.vn
-                                                
-                </li>
+                <li className="text-base">Email: 522h0058@student.tdtu.edu.vn</li>
+                <li className="text-base">OR: 522h0010@student.tdtu.edu.vn</li>
             </ul>
         </div>
         <div className="col-span-full mt-10 text-center">
