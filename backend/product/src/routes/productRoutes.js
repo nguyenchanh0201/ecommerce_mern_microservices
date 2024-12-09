@@ -2,11 +2,15 @@ const express = require('express');
 
 const router = express.Router();
 const ProductController = require('../controllers/productController');
+const isAuthenticated = require('../utils/isAuthenticated');
 const productController = new ProductController();
+
+
 
 // General Product Routes
 router.get('/', (req, res, next) => productController.getProduct(req, res, next));
 router.post('/', (req, res, next) => productController.createProduct(req, res, next));
+router.post('/buy',isAuthenticated, (req, res, next) => productController.createOrder(req, res, next));
 router.get('/page', (req, res, next) => productController.getProductPaginate(req, res, next));
 router.get('/search', (req, res, next) => productController.searchProduct(req, res, next));
 router.get('/:id', (req, res, next) => productController.getProductById(req, res, next));

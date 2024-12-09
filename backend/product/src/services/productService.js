@@ -1,6 +1,7 @@
 const ProductRepository = require('../repositories/productRepository');
 const calculateAverage = require('../utils/calculateAverage');
 
+
 class ProductService {
 
     constructor() {
@@ -30,6 +31,16 @@ class ProductService {
 
     async getProductById(id) {
         const result = await this.ProductRepository.getProductById(id);
+
+        if (!result) {
+            return { success: false, message: 'No product found' };
+        }
+
+        return { success: true, data: result };
+    }
+
+    async getProductsByIds(ids) {
+        const result = await this.ProductRepository.getProductsByIds(ids);
 
         if (!result) {
             return { success: false, message: 'No product found' };

@@ -15,6 +15,10 @@ class ProductRepository {
         return await Product.findOne({_id: id});
     }
 
+    async getProductsByIds(ids) {
+        return await Product.find({ _id: { $in: ids } });
+    }
+
     async createProduct(product) {
         return await Product.create(product);
     }
@@ -45,10 +49,11 @@ class ProductRepository {
             })
         ]);
     
-        return { results, total };
+        return { success: true, data: results, total };
     }
 
     async getProductByCategory(category, page, limit) {
+        
         const skip = (page - 1) * limit;
     
         const [results, total] = await Promise.all([
@@ -62,7 +67,7 @@ class ProductRepository {
             })
         ]);
     
-        return { results, total };
+        return { success: true, data: results, total };
     }
 
     

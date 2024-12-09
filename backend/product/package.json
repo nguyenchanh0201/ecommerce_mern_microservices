@@ -17,7 +17,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.8.3",
     "mongoose-paginate-v2": "^1.8.5",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "uuid": "^11.0.3"
   },
   "devDependencies": {
     "morgan": "^1.10.0"
