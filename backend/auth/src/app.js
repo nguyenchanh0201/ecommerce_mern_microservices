@@ -7,6 +7,7 @@ const AuthRoute = require('./routes/authRoutes')
 const UserRoute = require('./routes/userRoutes')
 const AccountRoute = require('./routes/accountRoutes')
 const facebookAuth = require('./routes/facebookAuthRoutes')
+const cors = require('cors')
 
 
 
@@ -36,6 +37,13 @@ class App {
         this.app.use(express.urlencoded({ extended: false }));
         this.app.use(errorHandler)
         this.app.use(morgan('dev'))
+        this.app.use(
+            cors({
+              origin: 'http://localhost:5174', // URL frontend
+              methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức được phép
+              credentials: true, // Nếu sử dụng cookie
+            })
+          );
     }
 
     setRoutes() {
@@ -44,7 +52,7 @@ class App {
         //User
        this.app.use("/user", UserRoute)
        this.app.use("/account", AccountRoute)
-        // this.app.get("/", authMiddleware, (req, res) => res.json({ message: "Welcome to dashboard" }));
+        this.app.get("/", (req, res, next) => res.json({ message: "Welcome to dashboard" }));
     }
 
     start() {
