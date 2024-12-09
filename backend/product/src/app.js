@@ -38,6 +38,7 @@ class App {
 
   setRoutes() {
     this.app.use("/", productsRoutes);
+    this.app.use('/uploads', express.static('uploads'));
   }
 
   setupMessageBroker() {

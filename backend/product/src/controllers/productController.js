@@ -1,6 +1,7 @@
 const ProductService = require('../services/productService');
 const messageBroker = require("../utils/messageBroker");
 const uuid = require('uuid');
+const uploadFile = require('../utils/uploadFile');
 
 class ProductController {
 
@@ -9,6 +10,8 @@ class ProductController {
         this.createOrder = this.createOrder.bind(this);
         this.getOrderStatus = this.getOrderStatus.bind(this);
         this.ordersMap = new Map();
+        this.createProduct = this.createProduct.bind(this);
+        
     }
 
     async getProduct(req, res, next) {
@@ -39,6 +42,7 @@ class ProductController {
     }
 
 
+
     async getProductById(req, res, next) {
         try {
             const { id } = req.params;
@@ -52,18 +56,39 @@ class ProductController {
         }
     }
 
+
+
     async createProduct(req, res, next) {
         try {
-            const product = req.body;
-            const result = await this.ProductService.createProduct(product);
-            if (!result.success) {
-                return res.status(400).json(result);
-            }
-            res.status(201).json(result);
+            // Upload image using multer middleware
+            uploadFile.single('image')(req, res, async (err) => {
+                if (err) {
+                    return res.status(400).json({ success: false, message: 'Image upload failed', error: err });
+                }
+
+                const product = JSON.parse(req.body.productData);
+
+                // If an image was uploaded, add the image URL to the product
+                if (req.file) {
+                    product.imageURL = `uploads/${req.file.filename}`;
+                }
+                // Call the service to create a new product
+                
+                const result = await this.ProductService.createProduct(product);
+                if (!result.success) {
+                    return res.status(400).json(result);
+                }
+
+                
+                res.status(201).json(result);
+            });
+
         } catch (err) {
             next(err);
         }
     }
+
+    
 
     async deleteProduct(req, res, next) {
         try {
