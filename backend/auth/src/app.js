@@ -39,7 +39,7 @@ class App {
         this.app.use(morgan('dev'))
         this.app.use(
             cors({
-              origin: 'http://localhost:5174', // URL frontend
+              origin: 'http://localhost:5173', // URL frontend
               methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức được phép
               credentials: true, // Nếu sử dụng cookie
             })

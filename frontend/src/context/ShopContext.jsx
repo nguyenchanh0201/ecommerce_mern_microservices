@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { products } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,8 @@ const [cartItems,setCartItems] = useState([]);
 const navigate  = useNavigate();
 const [couponCode, setCouponCode] = useState("");
 const [discount, setDiscount] = useState(0);
+const [token, setToken] = useState('');
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 
 const addToCart = async (itemId) => {
@@ -114,6 +116,11 @@ const applyCoupon = (code) => {
   }
 };
 
+useEffect(() => {
+  if(!token && localStorage.getItem('token')){
+    setToken(localStorage.getItem('token'))
+  }
+},[])
 
 
 const value = {
@@ -135,6 +142,9 @@ const value = {
     discount,
     setDiscount,
     applyCoupon,
+    token,
+    setToken,
+    backendUrl,
   };
   
   return (

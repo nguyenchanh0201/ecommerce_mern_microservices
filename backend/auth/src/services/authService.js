@@ -127,25 +127,24 @@ class AuthService {
     }
 
     async verifyUser(email, code) {
-        const user = await this.UserRepository.getUserByEmail(email);
+    const user = await this.UserRepository.getUserByEmail(email);
 
-        if (!user) {
-            return { success: false, message: "User not found" }
-        }
-
-        if (user.verificationCode !== code) {
-            return { success: false, message: "Invalid code" }
-        }
-
-        user.isVerified = true;
-        user.verificationCode = null;
-
-        await this.UserRepository.save(user);
-
-        return { success: true, message: "User verified successfully" }
-
-
+    if (!user) {
+        return { success: false, message: "User not found" };
     }
+
+    if (user.verificationCode !== code) {
+    return { success: false, message: "Invalid verification code" };
+    }
+
+    user.isVerified = true;
+    user.verificationCode = null;
+
+    await this.UserRepository.save(user);
+
+    return { success: true, message: "User verified successfully" };
+}
+
 
     async sendForgotPassword(email) {
         const user = await this.UserRepository.getUserByEmail(email);
