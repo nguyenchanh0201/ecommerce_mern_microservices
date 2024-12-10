@@ -23,7 +23,7 @@ const ShopContextProvider = ({ children }) => {
     if (savedCartItems) {
       setCartItems(JSON.parse(savedCartItems));
     }
-
+    
     if (!token && localStorage.getItem('token')) {
       setToken(localStorage.getItem('token'));
     }

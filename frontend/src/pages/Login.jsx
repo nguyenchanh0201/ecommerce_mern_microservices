@@ -13,7 +13,7 @@ const Login = () => {
   // Check if the user is already logged in when component is mounted
   useEffect(() => {
     if (token) {
-      // Redirect to homepage if user is already logged in
+      
       navigate("/");
     }
   }, [token, navigate]);
@@ -36,6 +36,7 @@ const Login = () => {
         setToken(token);
         localStorage.setItem("token", token);
         navigate("/");
+        
       }
     } catch (error) {
       if (error.response) {
@@ -58,35 +59,43 @@ const Login = () => {
   const handleFacebookLogin = () => {
     const width = 600;
     const height = 700;
-    const top = (window.innerHeight - height) / 2;
+  
+    // Calculate center position for popup
+    const left = (window.screen.width - width) / 2; // Use `screen.width` for better accuracy
+    const top = (window.screen.height - height) / 2; // Use `screen.height`
   
     const popup = window.open(
       'http://localhost:3000/auth/facebook',
       'Facebook Login',
-      `width=${width},height=${height},top=${top},scrollbars=no,resizable=no`
+      `width=${width},height=${height},top=${top},left=${left},scrollbars=no,resizable=no`
     );
   
-    // Lắng nghe thông điệp từ popup
+    if (!popup) {
+      toast.error('Popup blocked! Please allow popups for this site.');
+      return;
+    }
+  
+    // Listen for messages from the popup
     const handleMessage = (event) => {
-      // Kiểm tra nguồn gửi (bảo mật)
+      // Security check: ensure the origin is expected
       if (event.origin !== 'http://localhost:3000') return;
   
-      // Xử lý thông điệp từ popup
+      // Handle the message from the popup
       const { type, token } = event.data;
       if (type === 'FACEBOOK_LOGIN' && token) {
-        localStorage.setItem('token', token); // Lưu token vào localStorage
+        setToken(token); // Update context
+        localStorage.setItem('token', token); // Save token
         toast.success('Logged in successfully with Facebook!');
-        navigate('/'); // Điều hướng nếu cần
+        navigate('/'); // Redirect to home or another page
       }
   
-      // Xóa sự kiện sau khi xử lý
+      // Remove event listener after processing
       window.removeEventListener('message', handleMessage);
     };
   
-    // Thêm sự kiện lắng nghe
     window.addEventListener('message', handleMessage);
   
-    // Kiểm tra nếu popup bị đóng
+    // Check if popup is closed
     const checkPopupClosed = setInterval(() => {
       if (!popup || popup.closed) {
         clearInterval(checkPopupClosed);
@@ -94,6 +103,7 @@ const Login = () => {
       }
     }, 500);
   };
+  
   
 
   return (
