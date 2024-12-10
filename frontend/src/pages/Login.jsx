@@ -58,7 +58,6 @@ const Login = () => {
   const handleFacebookLogin = () => {
     const width = 600;
     const height = 700;
-    const left = (window.innerWidth - width) / 2;
     const top = (window.innerHeight - height) / 2;
   
     const popup = window.open(

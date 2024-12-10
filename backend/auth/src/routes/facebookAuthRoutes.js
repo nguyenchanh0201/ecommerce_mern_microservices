@@ -60,7 +60,12 @@ router.get(
 
       console.log('Token generated:', token);
       
-      res.status(200).send({ message: 'Facebook login success', token: token });
+      res.send(`
+      <script>
+        window.opener.postMessage({ type: 'FACEBOOK_LOGIN', token: '${token}' }, '*');
+        window.close();
+      </script>
+    `);
     } catch (error) {
       console.error('Error generating token:', error);
       res.status(500).send({ message: 'Error generating token' });
