@@ -17,8 +17,10 @@ const Cart = () => {
         const productPromises = Object.keys(cartItems)
           .filter((productId) => cartItems[productId] > 0) // Only include items with quantity > 0
           .map(async (productId) => {
-            const response = await axios.get(`${backEndURL.backendUrl}/products/${productId}`);
-            const productData = response.data; // Assuming product data is in the 'data' field
+            const response = await axios.get(
+              `${backEndURL.backendUrl}/products/${productId}`
+            );
+            const productData = response.data.data; // Assuming product data is in the 'data' property
             return {
               ...productData,
               quantity: cartItems[productId], // Add quantity to product data
@@ -34,7 +36,7 @@ const Cart = () => {
     };
 
     fetchCartData();
-  }, [cartItems]); // Re-fetch data whenever cartItems change
+  }, [cartItems, backEndURL]); // Re-fetch data whenever cartItems or backend URL changes
 
   const handleQuantityChange = (id, value) => {
     if (value > 0) {
@@ -52,22 +54,28 @@ const Cart = () => {
       </div>
 
       {/* Cart Items */}
-      <div>
-        {cartData.length > 0 ? (
-          cartData.map((item) => (
+      {cartData.length > 0 ? (
+        cartData.map((item) => {
+          // Check if image is available
+          const productImage = item.image && item.image.length > 0 ? item.image[0] : null;
+
+          return (
             <div
               key={item._id}
               className="py-4 border-t border-b text-gray-700 grid grid-cols-[3fr_1fr_1fr] sm:grid-cols-[3fr_1fr_1fr] items-center gap-4"
             >
               <div className="flex items-center gap-4">
                 {/* Image Products */}
-                <img
-                  className="w-16 sm:w-20"
-                  src={item.image[0]} // Use the correct image URL here
-                  alt={item.name}
-                />
+                {productImage ? (
+                  <img className="w-16 sm:w-20" src={productImage} alt={item.productName} />
+                ) : (
+                  <div className="w-16 sm:w-20 bg-gray-200 flex justify-center items-center">
+                    {/* Default fallback image */}
+                    <span className="text-gray-400">No Image</span>
+                  </div>
+                )}
                 <div>
-                  <p className="text-xs sm:text-lg font-medium">{item.name}</p>
+                  <p className="text-xs sm:text-lg font-medium">{item.productName}</p>
                   <p className="text-sm text-gray-500">
                     {currency}
                     {item.price}
@@ -103,11 +111,11 @@ const Cart = () => {
                 {(item.price * item.quantity).toFixed(2)}
               </div>
             </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-500 mt-6">Your cart is empty.</p>
-        )}
-      </div>
+          );
+        })
+      ) : (
+        <p className="text-center text-gray-500 mt-6">Your cart is empty.</p>
+      )}
 
       {/* Cart Total */}
       <div className="flex justify-end my-20">
