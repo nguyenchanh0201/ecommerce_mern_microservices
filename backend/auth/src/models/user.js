@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         unique: true,   // Ensures the email is unique
         required: false,
+        sparse: true
     },
     username: {
         type: String,
@@ -31,6 +32,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         unique: true,   // Ensures phone number is unique
         required: false,
+        sparse: true
     },
     password: {
         type: String,

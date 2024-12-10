@@ -24,7 +24,6 @@ passport.use(
         if (!user) {
           console.log('Adding new Facebook user to DB..');
           const newUser = {
-            email: `facebook_${profile.id}@example.com`,
             facebookId: profile.id,
             username: username,
             name: profile.displayName,
