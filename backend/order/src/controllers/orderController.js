@@ -32,6 +32,69 @@ class OrderController {
             next(error);
         }
     }
+
+    async getOrderById(req, res, next) {
+        const orderId = req.params.id;
+
+        try {
+            const order = await this.orderService.getOrderById(orderId);
+
+            if (!order) {
+                return res.status(404).json({ message: "Order not found" });
+            }
+            res.status(200).json(order);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async getOrderByUserId(req, res, next) {
+        const userId = req.user._id
+
+        try {
+            const orders = await this.orderService.getOrderByUserId(userId);
+
+            if (!orders.length) {
+                return res.status(404).json({ message: "No orders found" });
+            }
+            res.status(200).json(orders);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async deleteOrder(req, res, next) {
+        const orderId = req.params.id;
+
+        try {
+            const order = await this.orderService.deleteOrder(orderId);
+
+            if (!order) {
+                return res.status(404).json({ message: "Order not found" });
+            }
+            res.status(200).json({ message: "Order deleted successfully" });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    async updateOrder(req, res, next) {
+        const orderId = req.params.id;
+        const { products, userId, totalPrice } = req.body;
+
+        try {
+            const order = await this.orderService.updateOrder(orderId, products, userId, totalPrice);
+
+            if (!order) {
+                return res.status(404).json({ message: "Order not found" });
+            }
+            res.status(200).json(order);
+        } catch (error) {
+            next(error);
+        }
+    }
+
+
 }
 
 module.exports = OrderController;

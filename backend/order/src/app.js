@@ -30,7 +30,7 @@ class App {
   }
 
   async setRoutes() {
-    this.app.use("/orders", orderRoutes);
+    this.app.use("/", orderRoutes);
   }
 
   async setupOrderConsumer() {
@@ -47,12 +47,12 @@ class App {
         channel.consume("orders", async (data) => {
           // Consume messages from the order queue on buy
           console.log("Consuming ORDER service");
-          const { products, username, orderId, total } = JSON.parse(data.content);
+          const { products, userId, orderId, total } = JSON.parse(data.content);
           
   
           const newOrder = new Order({
             products,
-            user: username,
+            userId: userId,
             totalPrice: total,
           });
   

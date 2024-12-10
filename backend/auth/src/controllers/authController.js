@@ -137,6 +137,51 @@ class AuthController {
 
     }
 
+    async sendForgotPassword(req, res, next) {
+        try {
+            const {email} = req.body ; 
+            const result = await this.AuthService.sendForgotPassword(email);
+            if (!result.success) {
+                return res.status(400).json({
+                    success: false,
+                    message: result.message
+                });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: result.message
+            }); 
+
+        } catch(err) {
+            next(err)
+        }
+    }
+
+    async verifyResetPassword(req, res, next) {
+        try {
+            const {email , code} = req.body ;
+
+            const result = await this.AuthService.verifyResetCode(email , code) ; 
+
+            if (!result.success) {
+                return res.status(400).json({
+                    success: false,
+                    message: result.message
+                });
+            }
+            return res.status(200).json({
+                success: true,
+                message: result.message
+            });
+
+        } catch(err) {
+            next(err)
+        }
+    }
+
+
+
     async sendLoginOTP(req, res, next) {
         try {
             const { email } = req.body;

@@ -181,21 +181,23 @@ class ProductService {
     async getProductByName(name, page, limit) {
         const result = await this.ProductRepository.getProductByName(name, page, limit);
 
-        if (!result) {
+        // console.log(result.total)
+        if (result.total === 0 ) {
             return { success: false, message: 'No product found' };
         }
 
-        return { success: true, data: result };
+        return { success : true ,data: result };
     }
 
     async getProductByCategory(category, page, limit) {
         const result = await this.ProductRepository.getProductByCategory(category, page, limit);
+        // console.log(result.total)
 
-        if (!result) {
+        if (result.total === 0 ) {
             return { success: false, message: 'No product found' };
         }
 
-        return { success: true, data: result };
+        return { success : true ,data: result };
     }
 
     async editVariant(id, variantId, variants) {
@@ -324,6 +326,15 @@ class ProductService {
         return { success: true, data: result };
     }
 
+    async getLatestAndBestSellersProducts(quantity) {
+        const result = await this.ProductRepository.getLatestAndBestSellersProducts(quantity);
+
+        if (!result) {
+            return { success: false, message: 'No product found' };
+        }
+
+        return { success: true, data: result };
+    }
 
 
 

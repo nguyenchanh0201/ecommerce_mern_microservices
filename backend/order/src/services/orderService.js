@@ -30,7 +30,21 @@ class OrderService {
         return await Order.find();
     }
 
+    async getOrderById(orderId) {
+        return await Order.findById(orderId);
+    }
 
+    async getOrderByUserId(userId) {
+        return await Order.find({userId: userId});
+    }
+
+    async deleteOrder(orderId) {
+        return await Order.findByIdAndDelete(orderId);
+    }
+
+    async updateOrder(orderId, products, userId, totalPrice) {
+        return await Order.findByIdAndUpdate(orderId, {products, userId, totalPrice}, {new: true});
+    }
     
 }
 

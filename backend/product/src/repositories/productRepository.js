@@ -12,7 +12,7 @@ class ProductRepository {
     }
 
     async getProductById(id) {
-        return await Product.findOne({_id: id});
+        return await Product.findOne({ _id: id });
     }
 
     async getProductsByIds(ids) {
@@ -24,7 +24,7 @@ class ProductRepository {
     }
 
     async deleteProduct(id) {
-        return await Product.findByIdAndDelete({_id: id});
+        return await Product.findByIdAndDelete({ _id: id });
     }
 
     async save() {
@@ -37,7 +37,7 @@ class ProductRepository {
 
     async getProductByName(productName, page, limit) {
         const skip = (page - 1) * limit;
-    
+
         const [results, total] = await Promise.all([
             Product.find({
                 productName: { $regex: productName.trim(), $options: 'i' }
@@ -48,14 +48,14 @@ class ProductRepository {
                 productName: { $regex: productName.trim(), $options: 'i' }
             })
         ]);
-    
+
         return { success: true, data: results, total };
     }
 
     async getProductByCategory(category, page, limit) {
-        
+
         const skip = (page - 1) * limit;
-    
+
         const [results, total] = await Promise.all([
             Product.find({
                 category: { $regex: category.trim(), $options: 'i' }
@@ -66,11 +66,26 @@ class ProductRepository {
                 category: { $regex: category.trim(), $options: 'i' }
             })
         ]);
-    
+
         return { success: true, data: results, total };
     }
 
-    
+    async getLatestAndBestSellersProducts(x) {
+        const latestProducts = await Product.find()
+            .sort({ date_added: -1 }) // Sort by `date_added` in descending order
+            .limit(x) // Limit to `x` products
+            .exec();
+
+        // Get the best-seller products
+        const bestSellerProducts = await Product.find()
+            .sort({ totalSold: -1 }) // Sort by `sold_quantity` in descending order
+            .limit(x) // Limit to `x` products
+            .exec();
+
+        return { latestProducts, bestSellerProducts };
+    }
+
+
 }
 
 module.exports = ProductRepository;

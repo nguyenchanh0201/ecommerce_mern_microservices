@@ -22,6 +22,8 @@ const verifyUserValidator = [
     check("code").notEmpty().withMessage("Code is required")
 ]
 
+
+
 const verifyForgotPassword = [
     check("email").isEmail().withMessage("Invalid email").notEmpty().withMessage("Email is required"),  
     check("newPassword").isLength({min : 8}).withMessage('Password must be 8 characters long').notEmpty().withMessage('Repeat password is required')

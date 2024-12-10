@@ -4,6 +4,8 @@ const httpProxy = require("http-proxy");
 const proxy = httpProxy.createProxyServer();
 const app = express();
 
+const morgan = require("morgan");
+app.use(morgan("dev"));
 
 app.use("/products", (req, res) => {
     proxy.web(req, res, { target: "http://localhost:3001" });

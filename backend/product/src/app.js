@@ -6,6 +6,7 @@ const productsRoutes = require("./routes/productRoutes");
 require("dotenv").config();
 const {errorHandler} = require('./middlewares');
 const morgan = require('morgan');
+const path = require('path');
 
 class App {
   constructor() {
@@ -38,7 +39,7 @@ class App {
 
   setRoutes() {
     this.app.use("/", productsRoutes);
-    this.app.use('/uploads', express.static('uploads'));
+    this.app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
   }
 
   setupMessageBroker() {

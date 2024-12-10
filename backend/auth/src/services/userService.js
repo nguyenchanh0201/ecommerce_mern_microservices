@@ -8,7 +8,7 @@ class UserService {
     }
 
     async createUser(user) {
-        let {email, phone, username} = user
+        let {email, phone, username, password, role} = user
 
         const isExistEmail = await this.UserRepository.getUserByEmail(email); 
         
@@ -26,8 +26,12 @@ class UserService {
             username = await generateUsername()
 
         }
+        if (!password) {
+            const newUser = await this.UserRepository.createUser({email, phoneNumber: phone, username})
+        }
+
+        const newUser = await this.UserRepository.createUser({email, phoneNumber: phone, username, password, role})
         
-        const newUser = await this.UserRepository.createUser({email, phoneNumber: phone, username})
 
         return {success: true , message : newUser};
 

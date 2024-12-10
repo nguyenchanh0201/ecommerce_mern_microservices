@@ -11,6 +11,7 @@ const productController = new ProductController();
 router.get('/', (req, res, next) => productController.getProduct(req, res, next));
 router.post('/', (req, res, next) => productController.createProduct(req, res, next));
 router.post('/buy',isAuthenticated, (req, res, next) => productController.createOrder(req, res, next));
+router.get('/sellerlatest/:x', (req, res, next) => productController.getLatestAndBestSellersProducts(req, res, next));
 router.get('/page', (req, res, next) => productController.getProductPaginate(req, res, next));
 router.get('/search', (req, res, next) => productController.searchProduct(req, res, next));
 router.get('/:id', (req, res, next) => productController.getProductById(req, res, next));
@@ -26,7 +27,7 @@ router.delete('/:id/variant/:variantId', (req, res, next) => productController.d
 router.put('/:id/specifications', (req, res, next) => productController.editSpecification(req, res, next));
 
 // Review Routes
-router.post('/:id/review/', (req, res, next) => productController.addReview(req, res, next));
+router.post('/:id/review/', isAuthenticated, (req, res, next) => productController.addReview(req, res, next));
 router.delete('/:id/review/:reviewId', (req, res, next) => productController.deleteReview(req, res, next));
 
 // Tag Routes

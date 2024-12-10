@@ -121,7 +121,10 @@ class ProductController {
     async addReview(req, res, next) {
         try {
             const { id } = req.params;
+            const username = req.user.username;
+
             const review = req.body;
+            review.username = username;
             const result = await this.ProductService.addProductReview(id, review);
             if (!result.success) {
                 return res.status(400).json(result);
@@ -156,20 +159,20 @@ class ProductController {
 
 
             const result = await this.ProductService.getProductByName(nameOrCategory, page, limit);
+            // console.log(result.success)
 
-            // if (result.data.length === 0) {
-            //     const resultCategory = await ProductService.getProductByCategory(nameOrCategory, page, limit);
-            //     if (resultCategory.data.length === 0) {
-            //         return res.status(404).json({ success: false, message: 'No product found' });
-            //     }
-            //     return res.status(200).json({ success: true, data: resultCategory.data, total: resultCategory.total });
-            // }
-            if (result.data.length === 0 ) {
-                return res.status(404).json({ success: false, message: 'No product found' });
+
+            if (!result.success) {
+                const resultCategory = await this.ProductService.getProductByCategory(nameOrCategory, page, limit);
+                
+                if (!resultCategory.success) {
+                    return res.status(404).json(result);
+                }
+                return res.status(200).json(resultCategory.data);
+                
             }
             
-
-            return res.status(200).json(result);
+            return res.status(200).json(result.data);
 
         } catch (err) {
             next(err);
@@ -279,11 +282,7 @@ class ProductController {
 
         try {
 
-            const token = req.headers.authorization;
-
-            if (!token) {
-                return res.status(401).json({ success: false, message: 'Unauthorized' });
-            }
+            
 
             const { ids } = req.body;
             
@@ -301,13 +300,13 @@ class ProductController {
             this.ordersMap.set(orderId, {
                 status: "pending",
                 products,
-                username: req.user.username,
+                userId: req.user._id,
                 total: total
             });
 
             await messageBroker.publishMessage("orders", {
                 products: ids,
-                username: req.user.username,
+                userId: req.user._id,
                 orderId,
                 total: total,
             })
@@ -355,6 +354,20 @@ class ProductController {
         }
 
     }
+
+    async getLatestAndBestSellersProducts(req, res, next) {
+        try {
+            const { x } = req.params;
+            const result = await this.ProductService.getLatestAndBestSellersProducts(x);
+            if (!result.success) {
+                return res.status(404).json(result);
+            }
+            res.status(200).json(result);
+        } catch (err) {
+            next(err);
+        }
+    }
+
 
 
 

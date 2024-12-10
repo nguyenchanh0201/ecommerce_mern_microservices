@@ -15,13 +15,14 @@ const variantSchema = new Schema({
   color: { type: String, required: true },
   size: { type: String, required: true },
   price: { type: Number, required: true },
-  stock: { type: Number, required: true }
+  stock: { type: Number, required: true },
+  totalSold: { type: Number, default: 0 },
 });
 
 
 const productSchema = new Schema({
   productName: { type: String, required: true },
-  imageURL: { type: String, required: true },
+  imageURL: { type: String, required: false },
   category: { type: String, required: true },
   price: { type: Number, required: true },
   discount: { type: Number, default: 0 }, 
@@ -38,9 +39,14 @@ const productSchema = new Schema({
   brand: { type: String, required: true },
   tags: [{ type: String }],
   averageRatings: { type: Number, default: 0 },
+  totalSold: { type: Number, default: 0 },
+  stock: { type: Number, required: true },
   reviews: [reviewSchema], 
   variants: [variantSchema], 
-  related_products: [{ type: String }],
+  related_products: [{
+    type: Schema.Types.ObjectId,
+    ref: 'products'
+  }],
   warranty: { type: String, required: true },
   return_policy: { type: String, required: true },
   date_added: { type: Date, default: Date.now },
