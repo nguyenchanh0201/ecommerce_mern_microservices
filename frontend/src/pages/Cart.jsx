@@ -6,8 +6,10 @@ import CartTotal from "../components/CartTotal";
 import axios from "axios";
 
 const Cart = () => {
-  const { currency, cartItems, updateQuantity, navigate } = useContext(ShopContext);
+  const { currency, cartItems, updateQuantity, navigate, delivery_fee, applyCoupon, discount } =
+    useContext(ShopContext);
   const [cartData, setCartData] = useState([]);
+  const [totalAmount, setTotalAmount] = useState(0);  // Added state for total amount
   const backEndURL = useContext(ShopContext);
 
   useEffect(() => {
@@ -29,6 +31,14 @@ const Cart = () => {
 
         const products = await Promise.all(productPromises);
         setCartData(products);
+
+        // Calculate the total amount dynamically
+        const calculatedTotal = products.reduce((total, product) => {
+          return total + product.price * product.quantity;  // price * quantity for each item
+        }, 0);
+
+        setTotalAmount(calculatedTotal); // Update total amount
+
       } catch (error) {
         console.error("Error fetching product details:", error);
         alert("Failed to load product data. Please try again later.");
@@ -120,7 +130,14 @@ const Cart = () => {
       {/* Cart Total */}
       <div className="flex justify-end my-20">
         <div className="w-full sm:w-[450px]">
-          <CartTotal />
+          <CartTotal 
+            cartItems={cartItems} 
+            totalAmount={totalAmount} 
+            discount={discount}
+            currency={currency}
+            delivery_fee={delivery_fee} 
+            applyCoupon={applyCoupon} 
+          />
           <div className="w-full text-end">
             <button
               onClick={() => navigate("/place-order")}

@@ -2,7 +2,6 @@ import Title from '../components/Title';
 import { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { ShopContext } from '../context/ShopContext';
-import CartToTal from '../components/CartTotal';
 
 const PlaceOrder = () => {
   const [method, setMethod] = useState('cod');
@@ -12,7 +11,7 @@ const PlaceOrder = () => {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [selectedWard, setSelectedWard] = useState('');
-  
+
   // Customer information state
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -78,14 +77,61 @@ const PlaceOrder = () => {
       },
       paymentMethod: method,
       cartTotal: 100, // Replace this with actual cart total calculation
-      // Add other order details here if necessary
     };
 
-    // Send orderData to your backend or place order logic here
-    console.log('Placing order with data:', orderData);
+    // Create a new user via the backend API (localhost:3003/user)
+    axios.post('http://localhost:3003/account/profile/address', {
+      email,
+      phone,
+      name: `${firstName} ${lastName}`,
+      address: {
+        city: selectedCity,
+        district: selectedDistrict,
+        ward: selectedWard,
+      },
+    })
+    .then(response => {
+      console.log('User created successfully:', response.data);
 
-    // After order is placed, navigate to orders page
-    navigate('/orders');
+      // After user creation, get the token from localStorage (or context)
+      const token = localStorage.getItem('token'); // Assuming the token is saved in localStorage
+
+      if (token) {
+        // Prepare address data to be added to the user's profile
+        const addressData = {
+          name: `${firstName} ${lastName}`,
+          street: 'Tran Van On', // You can customize this if you want an input for the street.
+          city: selectedCity,
+          district: selectedDistrict,
+          ward: selectedWard,
+          phoneNumber: phone,
+          isDefault: true,
+        };
+
+        // Send the address to update the user's profile via POST method
+        axios.post('http://localhost:3003/account/profile/address', addressData, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Attach the token to the headers
+          },
+        })
+        .then(response => {
+          console.log('Address added successfully:', response.data);
+          // After address update, navigate to the orders page
+          navigate('/orders');
+        })
+        .catch(error => {
+          console.error('Error adding address:', error);
+        });
+      } else {
+        console.error('No token found, unable to update address.');
+      }
+    })
+    .catch(error => {
+      console.error('Error creating user:', error);
+    });
+
+    // Send orderData to your backend for placing the order (you can send it to a different endpoint if needed)
+    console.log('Placing order with data:', orderData);
   };
 
   return (
@@ -103,14 +149,14 @@ const PlaceOrder = () => {
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
           />
-          <input
-            className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-            type="text"
-            placeholder="Last name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
         </div>
+        <input
+          className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
+          type="text"
+          placeholder="Last name"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+        />
         <input
           className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
           type="email"
@@ -175,7 +221,7 @@ const PlaceOrder = () => {
       {/* Right Side */}
       <div className="mt-8">
         <div className="mt-8 min-w-80">
-          <CartToTal />
+          
         </div>
         <div className="mt-12">
           <Title text1={'PAYMENT '} text2={'METHOD'} />
