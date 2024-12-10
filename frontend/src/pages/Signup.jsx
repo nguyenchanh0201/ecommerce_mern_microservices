@@ -30,8 +30,8 @@ const Signup = () => {
           
         });
         if (response.data.success) {
-          setToken(response.data.token);
-          localStorage.setItem('token', response.data.token);
+          navigate('/login');
+          toast.success('Sign up successful. Please log in.');
         } else {
           toast.error(response.data.message || 'Failed to sign up.');
         }
@@ -110,10 +110,9 @@ const Signup = () => {
       />
 
       <div className="w-full flex justify-between text-sm mt-[-8px]">
-        <p className="cursor-pointer">Forgot your password?</p>
         {currentState === 'Login' ? (
           <p onClick={() => setCurrentState('Sign Up')} className="cursor-pointer">
-            Create account
+            
           </p>
         ) : (
           <p onClick={() => navigate('/login')} className="cursor-pointer">
@@ -122,7 +121,7 @@ const Signup = () => {
         )}
       </div>
       
-      <button className="w-full py-2 bg-gray-800 text-white">
+      <button onClick={() => navigate('/login')} className="w-full py-2 bg-red-600 text-white">
         {currentState === 'Login' ? 'Sign In' : 'Sign Up'}
       </button>
 

@@ -1,18 +1,20 @@
-import { useContext, useEffect, useState } from 'react';
-import { ShopContext } from '../context/ShopContext';
-import axios from 'axios';
-import { toast } from 'react-toastify';
+import { useContext, useEffect, useState } from "react";
+import { ShopContext } from "../context/ShopContext";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 
 const Login = () => {
   const { backendUrl, token, setToken, navigate } = useContext(ShopContext);
-  const [usernameOrEmail, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [usernameOrEmail, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setError] = useState("");
 
   // Check if the user is already logged in when component is mounted
   useEffect(() => {
     if (token) {
       // Redirect to homepage if user is already logged in
-      navigate('/');
+      navigate("/");
     }
   }, [token, navigate]);
 
@@ -23,34 +25,77 @@ const Login = () => {
       console.log({
         usernameOrEmail,
         password,
-      })
-      const response = await axios.post(backendUrl + '/auth/signin', {
+      });
+      const response = await axios.post(backendUrl + "/auth/signin", {
         usernameOrEmail,
         password,
       });
+      const { token } = response.data;
 
-      if (response.data.token) {
-        setToken(response.data.token);
-        localStorage.setItem('token', response.data.token);
-      } else {
-        toast.error(response.data.message || 'Login failed.');
+      if (token) {
+        setToken(token);
+        localStorage.setItem("token", token);
+        navigate("/");
       }
     } catch (error) {
       if (error.response) {
-        console.error('Response data:', error.response.data); // Log thông báo lỗi từ backend
-        toast.error(error.response.data.message || 'Login failed.');
+        console.error("Response data:", error.response.data);
+        const { message } = error.response.data;
+
+        // Nếu message là "Please verify your account", lưu vào state
+        if (message === "Please verify your account") {
+          setError(message);
+        } else {
+          toast.error(message || "Login failed.");
+        }
       } else {
-        console.error('Error:', error.message);
-        toast.error('An error occurred. Please try again.');
+        console.error("Error:", error.message);
+        toast.error("An error occurred. Please try again.");
       }
     }
-    
   };
 
   const handleFacebookLogin = () => {
-    
-    console.log('Logging in with Facebook');
+    const width = 600;
+    const height = 700;
+    const left = (window.innerWidth - width) / 2;
+    const top = (window.innerHeight - height) / 2;
+  
+    const popup = window.open(
+      'http://localhost:3000/auth/facebook',
+      'Facebook Login',
+      `width=${width},height=${height},top=${top},scrollbars=no,resizable=no`
+    );
+  
+    // Lắng nghe thông điệp từ popup
+    const handleMessage = (event) => {
+      // Kiểm tra nguồn gửi (bảo mật)
+      if (event.origin !== 'http://localhost:3000') return;
+  
+      // Xử lý thông điệp từ popup
+      const { type, token } = event.data;
+      if (type === 'FACEBOOK_LOGIN' && token) {
+        localStorage.setItem('token', token); // Lưu token vào localStorage
+        toast.success('Logged in successfully with Facebook!');
+        navigate('/'); // Điều hướng nếu cần
+      }
+  
+      // Xóa sự kiện sau khi xử lý
+      window.removeEventListener('message', handleMessage);
+    };
+  
+    // Thêm sự kiện lắng nghe
+    window.addEventListener('message', handleMessage);
+  
+    // Kiểm tra nếu popup bị đóng
+    const checkPopupClosed = setInterval(() => {
+      if (!popup || popup.closed) {
+        clearInterval(checkPopupClosed);
+        window.removeEventListener('message', handleMessage);
+      }
+    }, 500);
   };
+  
 
   return (
     <form
@@ -80,12 +125,24 @@ const Login = () => {
       />
 
       <div className="w-full flex justify-between text-sm mt-[-8px]">
-        <p className="cursor-pointer">Forgot your password?</p>
-        <p onClick={() => navigate('/signup')} className="cursor-pointer">Do not have an account? Sign Up</p>
+        <p onClick={() => navigate("/signup")} className="cursor-pointer">
+          Do not have an account? Sign Up
+        </p>
       </div>
       <button type="submit" className="w-full py-2 bg-gray-800 text-white">
-        Sign In
+        Login
       </button>
+      {errorMessage && (
+        <div className="mt-4 text-red-600 text-sm">
+          {errorMessage}.{" "}
+          <span
+            onClick={() => navigate("/verify-email")}
+            className="text-blue-600 underline cursor-pointer"
+          >
+            Verify now
+          </span>
+        </div>
+      )}
 
       {/* Facebook Login Button */}
       <div className="w-full flex justify-center mt-4">
@@ -97,6 +154,8 @@ const Login = () => {
           <i className="fab fa-facebook-f"></i> Log in with Facebook
         </button>
       </div>
+
+      <ToastContainer />
     </form>
   );
 };

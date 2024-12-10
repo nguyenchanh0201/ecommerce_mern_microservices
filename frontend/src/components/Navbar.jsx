@@ -8,18 +8,18 @@ const Navbar = () => {
   const { setShowSearch, getCartCount, token, navigate,setToken, setCartItems } = useContext(ShopContext);
   
   const logout  = () => {
+    navigate('/login');
     localStorage.removeItem('token');
     setToken('');
     setCartItems({});
-    navigate('/login');
+    
   }
   const handleProfileClick = () => {
-    if (token) {
-      navigate('/profile');
-    } else {
-      
+    if (!token) {
       navigate('/login');
+      
     }
+    navigate('/profile');
   };
 
   return (
@@ -64,7 +64,7 @@ const Navbar = () => {
             <div className="flex flex-col gap-2 w-36 py-3 px-5 bg-gray-700 text-white">
               <p className="cursor-pointer hover:text-yellow-400">My Profile</p>
               <p className="cursor-pointer hover:text-yellow-400">Orders</p>
-              <p  onClick={logout} className="cursor-pointer hover:text-yellow-400">Logout</p>
+              <p   onClick={logout} className="cursor-pointer hover:text-yellow-400">Logout</p>
             </div>
           </div>
         </div>
