@@ -1,36 +1,105 @@
-import { Route, Routes } from "react-router-dom";
+import React, { useState } from "react";
+import { BrowserRouter as Router, Route, Routes, Navigate, Link } from "react-router-dom";
 
-import Sidebar from "./components/common/Sidebar";
+import ProductList from "./pages/ProductList";
+import OrdersList from "./pages/OrderList";
+import UsersList from "./pages/UserList";
+import Login from "./pages/LoginForm";
 
-import OverviewPage from "./pages/OverviewPage";
-import ProductsPage from "./pages/ProductsPage";
-import UsersPage from "./pages/UsersPage";
-import SalesPage from "./pages/SalesPage";
-import OrdersPage from "./pages/OrdersPage";
-import AnalyticsPage from "./pages/AnalyticsPage";
-import SettingsPage from "./pages/SettingsPage";
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-function App() {
-	return (
-		<div className='flex h-screen bg-gray-900 text-gray-100 overflow-hidden'>
-			{/* BG */}
-			<div className='fixed inset-0 z-0'>
-				<div className='absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 opacity-80' />
-				<div className='absolute inset-0 backdrop-blur-sm' />
-			</div>
+  return (
+    <Router>
+      <div>
+        {/* Navigation */}
+        {isAuthenticated && (
+          <nav className="navbar navbar-expand-lg navbar-dark bg-dark w-100">
+            <div className="container">
+              <a className="navbar-brand" href="/products">
+                Product Management
+              </a>
+              <button
+                className="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarNav"
+                aria-controls="navbarNav"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+              >
+                <span className="navbar-toggler-icon"></span>
+              </button>
+              <div className="collapse navbar-collapse" id="navbarNav">
+                <ul className="navbar-nav">
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/products">
+                      Products
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/orders">
+                      Orders
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/users">
+                      Users
+                    </Link>
+                  </li>
+                </ul>
+                <button
+                  className="btn btn-danger ms-auto"
+                  onClick={() => {
+                    setIsAuthenticated(false);
+                  }}
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </nav>
+        )}
 
-			<Sidebar />
-			<Routes>
-				<Route path='/' element={<OverviewPage />} />
-				<Route path='/products' element={<ProductsPage />} />
-				<Route path='/users' element={<UsersPage />} />
-				<Route path='/sales' element={<SalesPage />} />
-				<Route path='/orders' element={<OrdersPage />} />
-				<Route path='/analytics' element={<AnalyticsPage />} />
-				<Route path='/settings' element={<SettingsPage />} />
-			</Routes>
-		</div>
-	);
-}
+        {/* Routes */}
+        <Routes>
+          {/* Redirect "/" to "/products" */}
+          <Route
+            path="/"
+            element={
+              isAuthenticated ? <Navigate to="/products" replace /> : <Navigate to="/login" replace />
+            }
+          />
+
+          {/* Login Route */}
+          <Route
+            path="/login"
+            element={<Login setIsAuthenticated={setIsAuthenticated} />}
+          />
+
+          {/* Protected Routes */}
+          <Route
+            path="/products"
+            element={
+              isAuthenticated ? <ProductList /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              isAuthenticated ? <OrdersList /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/users"
+            element={
+              isAuthenticated ? <UsersList /> : <Navigate to="/login" replace />
+            }
+          />
+        </Routes>
+      </div>
+    </Router>
+  );
+};
 
 export default App;

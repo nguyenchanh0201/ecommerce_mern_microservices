@@ -28,7 +28,7 @@ class UserRepository {
     }
 
     async deleteUser(userId) {
-        return await User.findByIdAndDelete({ _id: userId });
+        return await User.findByIdAndDelete(userId);
     }
 
 
