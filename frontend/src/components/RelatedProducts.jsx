@@ -1,31 +1,44 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react";
 import PropTypes from 'prop-types';
-import { ShopContext } from "../context/ShopContext"
-import Title from "./Title"
-import ProductItems from "./ProductItems"
-import { useNavigate } from "react-router-dom"  // Để sử dụng navigate chuyển hướng đến chi tiết sản phẩm
+import { ShopContext } from "../context/ShopContext";
+import Title from "./Title";
+import ProductItems from "./ProductItems";
+import { useNavigate } from "react-router-dom";  // To navigate to product details
+import axios from "axios";
 
-const RelatedProducts = ({ category, subCategory }) => {
-  const { products } = useContext(ShopContext);
+const RelatedProducts = ({ brand }) => {
+  const backEndURL = useContext(ShopContext);
   const [related, setRelated] = useState([]);
-  const navigate = useNavigate();  // Hook để điều hướng đến sản phẩm chi tiết
+  const navigate = useNavigate();  // Hook to navigate to product details
 
+  // Fetch related products based on brand
   useEffect(() => {
-    if (products.length > 0) {
-      let productsCopy = products.slice();
-      productsCopy = productsCopy.filter((item) => category === item.category && item.subCategory === subCategory);
-      setRelated(productsCopy.slice(0, 5));
-    }
-  }, [category, subCategory, products]);
+    const fetchRelatedProducts = async () => {
+      try {
+        const response = await axios.get(`${backEndURL.backendUrl}/products`, {
+          params: { brand: brand },  // Fetch products with the same brand
+        });
+        const relatedProducts = response.data.data; // Assuming products are in 'data'
+        setRelated(relatedProducts.slice(0, 5));  // Limit to 5 related products
+      } catch (error) {
+        console.error("Error fetching related products:", error);
+        alert("Failed to load related products. Please try again later.");
+      }
+    };
 
-  // Hàm xử lý khi nhấn vào sản phẩm
+    if (brand) {
+      fetchRelatedProducts();
+    }
+  }, [brand, backEndURL]);
+
+  // Handle click to navigate to the product details page
   const handleProductClick = (id) => {
-    // Cuộn trang lên đầu
+    // Scroll to the top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    // Điều hướng đến trang chi tiết sản phẩm
+    // Navigate to the product detail page
     navigate(`/product/${id}`);
-  }
+  };
 
   return (
     <div className="my-24">
@@ -37,19 +50,19 @@ const RelatedProducts = ({ category, subCategory }) => {
           <div key={index} onClick={() => handleProductClick(item._id)} className="cursor-pointer">
             <ProductItems 
               id={item._id} 
-              name={item.name} 
+              name={item.productName} 
               price={item.price} 
-              image={item.image} 
+              image={`${backEndURL.backendUrl}/products/${item.imageURL}`} // Corrected: Access item.imageURL directly
             />
           </div>
         ))}
       </div>
     </div>
   );
-}
+};
+
 RelatedProducts.propTypes = {
-  category: PropTypes.string.isRequired,
-  subCategory: PropTypes.string.isRequired,
+  brand: PropTypes.string.isRequired, // Only brand needed for related products
 };
 
 export default RelatedProducts;
