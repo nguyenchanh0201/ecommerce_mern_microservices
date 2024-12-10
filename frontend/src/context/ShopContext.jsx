@@ -6,124 +6,126 @@ import { useNavigate } from "react-router-dom";
 export const ShopContext = createContext();
 
 const ShopContextProvider = ({ children }) => {
-const currency = "$";
-const delivery_fee = 10;
-const [search, setSearch] = useState("");
-const [showSearch, setShowSearch] = useState(true);
-const [cartItems,setCartItems] = useState([]);
-const navigate  = useNavigate();
-const [couponCode, setCouponCode] = useState("");
-const [discount, setDiscount] = useState(0);
-const [token, setToken] = useState('');
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const currency = "$";
+  const delivery_fee = 10;
+  const [search, setSearch] = useState("");
+  const [showSearch, setShowSearch] = useState(true);
+  const [cartItems, setCartItems] = useState({});
+  const navigate = useNavigate();
+  const [couponCode, setCouponCode] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [token, setToken] = useState('');
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-
-const addToCart = async (itemId) => {
-
-      let cartData = structuredClone(cartItems)
-
-      if(cartData[itemId]){
-          if(cartData[itemId]){
-          cartData[itemId] += 1
-          }
-          else{
-          cartData[itemId] = 1
-          }
-      }
-      else{
-          cartData[itemId] = 1
-      }
-      setCartItems(cartData)
-}
-  
-const getCartCount = () => {
-  let totalCount = 0;
-
-  // Ensure cartItems is an object
-  if (!cartItems || typeof cartItems !== 'object') {
-    console.error('cartItems is not defined or not an object.');
-    return totalCount;
-  }
-
-  // Iterate through cartItems keys and sum up the quantities
-  for (const itemId in cartItems) {
-    const count = cartItems[itemId];
-    if (typeof count === 'number' && count > 0) {
-      totalCount += count;
-    } else {
-      console.warn(`Invalid count for itemId: ${itemId}. Skipping...`);
+  // Load cartItems from localStorage on mount
+  useEffect(() => {
+    const savedCartItems = localStorage.getItem('cartItems');
+    if (savedCartItems) {
+      setCartItems(JSON.parse(savedCartItems));
     }
-  }
 
-  return totalCount;
-};
+    if (!token && localStorage.getItem('token')) {
+      setToken(localStorage.getItem('token'));
+    }
+  }, []);
 
-const updateQuantity = async (itemId, quantity) => {
-  // Only change if quantity > 0, otherwise remove product from cart
-  if (quantity > 0) {
-    setCartItems((prevItems) => {
-      return { ...prevItems, [itemId]: quantity };
-    });
-  } else {
-    // If quantity is 0, remove product from cart
-    setCartItems((prevItems) => {
-      const newItems = { ...prevItems };
-      delete newItems[itemId]; // Remove products from cartItems
-      return newItems;
-    });
-  }
-};
+  // Update localStorage whenever cartItems changes
+  useEffect(() => {
+    if (Object.keys(cartItems).length > 0) {
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    } else {
+      // If cart is empty, clear cart from localStorage
+      localStorage.removeItem('cartItems');
+    }
+  }, [cartItems]);
 
-const getCartAmount = () => {
-  let totalAmount = 0;
+  const addToCart = async (itemId) => {
+    let cartData = structuredClone(cartItems);
 
-  for (const itemId in cartItems) {
-      const itemInfo = products.find((product) => product._id === itemId);
+    if (cartData[itemId]) {
+      cartData[itemId] += 1;
+    } else {
+      cartData[itemId] = 1;
+    }
 
-      if (!itemInfo) continue; 
-
-      totalAmount += itemInfo.price * (cartItems[itemId] || 0);
-  }
-
-  return totalAmount || 0; 
-};
-
-const applyCoupon = (code) => {
-  const validCoupons = {
-    KIETCHANH: "20%", // Discount 20% 
-    KIET20: 20, // OFF 20
-    CHANH20: 20, // OFF 20
-
+    setCartItems(cartData); // Update state
   };
 
-  if (validCoupons[code]) {
-    setCouponCode(code);
-
-    // Check the discount style
-    if (typeof validCoupons[code] === "string" && validCoupons[code].endsWith("%")) {
-      const percent = parseFloat(validCoupons[code].replace("%", ""));
-      const subtotal = getCartAmount();
-      setDiscount((subtotal * percent) / 100); // Discount by percentage
-    } else {
-      setDiscount(validCoupons[code]); // Discount by fixed amount
+  const getCartCount = () => {
+    let totalCount = 0;
+    if (!cartItems || typeof cartItems !== 'object') {
+      console.error('cartItems is not defined or not an object.');
+      return totalCount;
     }
 
-    alert(`Coupon applied! Discount: ${validCoupons[code]}`);
-  } else {
-    setCouponCode("");
-    setDiscount(0);
-    alert("Invalid coupon code!");
-  }
-};
+    for (const itemId in cartItems) {
+      const count = cartItems[itemId];
+      if (typeof count === 'number' && count > 0) {
+        totalCount += count;
+      } else {
+        console.warn(`Invalid count for itemId: ${itemId}. Skipping...`);
+      }
+    }
 
-useEffect(() => {
-  if(!token && localStorage.getItem('token')){
-    setToken(localStorage.getItem('token'))
-  }
-},[])
+    return totalCount;
+  };
 
+  const updateQuantity = async (itemId, quantity) => {
+    let cartData = structuredClone(cartItems);
 
-const value = {
+    if (quantity > 0) {
+      cartData[itemId] = quantity;
+    } else {
+      delete cartData[itemId]; // Remove product from cart if quantity is 0
+    }
+
+    setCartItems(cartData); // Update state
+
+    // Always update localStorage after cartItems change
+    localStorage.setItem('cartItems', JSON.stringify(cartData));
+  };
+
+  const getCartAmount = () => {
+    let totalAmount = 0;
+
+    for (const itemId in cartItems) {
+      const itemInfo = products.find((product) => product._id === itemId);
+
+      if (!itemInfo) continue;
+
+      totalAmount += itemInfo.price * (cartItems[itemId] || 0);
+    }
+
+    return totalAmount || 0;
+  };
+
+  const applyCoupon = (code) => {
+    const validCoupons = {
+      KIETCHANH: "20%", // Discount 20% 
+      KIET20: 20, // OFF 20
+      CHANH20: 20, // OFF 20
+    };
+
+    if (validCoupons[code]) {
+      setCouponCode(code);
+
+      if (typeof validCoupons[code] === "string" && validCoupons[code].endsWith("%")) {
+        const percent = parseFloat(validCoupons[code].replace("%", ""));
+        const subtotal = getCartAmount();
+        setDiscount((subtotal * percent) / 100);
+      } else {
+        setDiscount(validCoupons[code]);
+      }
+
+      alert(`Coupon applied! Discount: ${validCoupons[code]}`);
+    } else {
+      setCouponCode("");
+      setDiscount(0);
+      alert("Invalid coupon code!");
+    }
+  };
+
+  const value = {
     products,
     currency,
     delivery_fee,
@@ -146,7 +148,7 @@ const value = {
     setToken,
     backendUrl,
   };
-  
+
   return (
     <ShopContext.Provider value={value}>
       {children}

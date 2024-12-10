@@ -25,6 +25,8 @@ const Cart = () => {
     } else {
       updateQuantity(id, 0); // If value < 1, remove product from cart
     }
+    // Update localStorage after modifying cartItems
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
   };
 
   return (
@@ -79,7 +81,11 @@ const Cart = () => {
                     }
                   />
                   <img
-                    onClick={() => updateQuantity(item._id, 0)}
+                    onClick={() => {
+                      updateQuantity(item._id, 0);
+                      // Update localStorage after removing item
+                      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+                    }}
                     className="w-4 sm:w-5 cursor-pointer"
                     src={assets.bin_icon}
                     alt="Remove item"
@@ -103,10 +109,9 @@ const Cart = () => {
         <div className="w-full sm:w-[450px]">
           <CartTotal />
           <div className="w-full text-end">
-            <button onClick={() =>navigate('/place-order')} className="bg-black text-white text-sm my-8 px-8 py-3">CHECKOUT</button>
+            <button onClick={() => navigate('/place-order')} className="bg-black text-white text-sm my-8 px-8 py-3">CHECKOUT</button>
           </div>
         </div>
-        
       </div>
     </div>
   );
