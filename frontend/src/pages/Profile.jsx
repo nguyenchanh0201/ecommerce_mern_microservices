@@ -13,6 +13,8 @@ const ProfileForm = () => {
     profilePicture: null,
   });
 
+  const [initialData, setInitialData] = useState(null); // Store initial data for comparison
+
   // Access backend URL from the ShopContext
   const backendUrl = useContext(ShopContext);
 
@@ -22,18 +24,21 @@ const ProfileForm = () => {
         // Fetch profile data from API
         const response = await axios.get(`${backendUrl.backendUrl}/account/profile`, {
           headers: {
-            "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         });
 
         // Set the profile data to state
-        setProfileData({
+        const fetchedData = {
           name: response.data.message.name,
           username: response.data.message.username,
           email: response.data.message.email,
           phoneNumber: response.data.message.phoneNumber,
           profilePicture: response.data.message.profilePicture,
-        });
+        };
+
+        setProfileData(fetchedData);
+        setInitialData(fetchedData); // Save fetched data as initial data
       } catch (error) {
         console.error("Error fetching profile data:", error);
         toast.error("An error occurred while fetching the profile.");
@@ -50,14 +55,30 @@ const ProfileForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Identify changed fields
+    const updatedFields = {};
+    for (const key in profileData) {
+      if (profileData[key] !== initialData[key]) {
+        updatedFields[key] = profileData[key];
+      }
+    }
+
+    // Avoid sending an empty request
+    if (Object.keys(updatedFields).length === 0) {
+      toast.info("No changes detected.");
+      return;
+    }
+
     try {
       // Update profile data via API
+      console.log(updatedFields)
       const response = await axios.put(
         `${backendUrl.backendUrl}/account/profile`,
-        profileData,
+        updatedFields,
         {
           headers: {
-            "Authorization": `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
         }
       );

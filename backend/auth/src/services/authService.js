@@ -337,34 +337,48 @@ class AuthService {
 
     async updateUser(userId, updateData) {
         const user = await this.UserRepository.getUserById(userId);
-
+      
         if (!user) {
-            return { success: false, message: "User not found" }
+          return { success: false, message: "User not found" };
         }
-
-        const { username, phoneNumber, name } = updateData;
-
-        const isExistUsername = await this.UserRepository.getUserByUsername(username);
-
-        if (isExistUsername) {
-            return { success: false, message: "Username existed" }
+      
+        const { username, phoneNumber, name, email } = updateData;
+      
+        // Check if email exists and is not the current user's email
+        if (email && email !== user.email) {
+          const isExistEmail = await this.UserRepository.getUserByEmail(email);
+          if (isExistEmail) {
+            return { success: false, message: "Email already exists" };
+          }
         }
-
-        const isExistPhone = await this.UserRepository.getUserByPhoneNum(phoneNumber);
-
-        if (isExistPhone) {
-            return { success: false, message: "Phone number existed" }
+      
+        // Check if username exists and is not the current user's username
+        if (username && username !== user.username) {
+          const isExistUsername = await this.UserRepository.getUserByUsername(username);
+          if (isExistUsername) {
+            return { success: false, message: "Username already exists" };
+          }
         }
-
+      
+        // Check if phone number exists and is not the current user's phone number
+        if (phoneNumber && phoneNumber !== user.phoneNumber) {
+          const isExistPhone = await this.UserRepository.getUserByPhoneNum(phoneNumber);
+          if (isExistPhone) {
+            return { success: false, message: "Phone number already exists" };
+          }
+        }
+      
+        // Update only the fields that are provided in updateData
         user.username = username || user.username;
         user.phoneNumber = phoneNumber || user.phoneNumber;
         user.name = name || user.name;
-
+        user.email = email || user.email;
+      
         await this.UserRepository.save(user);
-
-        return { success: true, message: "Update user success" };
-
-    }
+      
+        return { success: true, message: "User updated successfully", user };
+      }
+      
 
 
     async getUserProfile(userId) {
