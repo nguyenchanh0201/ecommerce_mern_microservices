@@ -3,9 +3,17 @@ const httpProxy = require("http-proxy");
 
 const proxy = httpProxy.createProxyServer();
 const app = express();
+const cors = require('cors');
 
 const morgan = require("morgan");
 app.use(morgan("dev"));
+require("dotenv").config();
+
+app.use(cors({
+    origin: process.env.FRONTEND_URL, // Specify allowed origins
+    methods: 'GET,POST,PUT,DELETE', // Specify allowed HTTP methods
+    allowedHeaders: 'Content-Type,Authorization', // Specify allowed headers
+  }));
 
 app.use("/products", (req, res) => {
     proxy.web(req, res, { target: "http://localhost:3001" });

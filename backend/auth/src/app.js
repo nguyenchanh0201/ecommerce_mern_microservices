@@ -7,7 +7,7 @@ const AuthRoute = require('./routes/authRoutes')
 const UserRoute = require('./routes/userRoutes')
 const AccountRoute = require('./routes/accountRoutes')
 const facebookAuth = require('./routes/facebookAuthRoutes')
-const cors = require('cors')
+// const cors = require('cors')
 
 
 
@@ -37,13 +37,13 @@ class App {
         this.app.use(express.urlencoded({ extended: false }));
         this.app.use(errorHandler)
         this.app.use(morgan('dev'))
-        this.app.use(
-            cors({
-              origin: 'http://localhost:5173', // URL frontend
-              methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức được phép
-              credentials: true, // Nếu sử dụng cookie
-            })
-          );
+        // this.app.use(
+        //     cors({
+        //       origin: 'http://localhost:5173', // URL frontend
+        //       methods: ['GET', 'POST', 'PUT', 'DELETE'], // Các phương thức được phép
+        //       credentials: true, // Nếu sử dụng cookie
+        //     })
+        //   );
     }
 
     setRoutes() {
