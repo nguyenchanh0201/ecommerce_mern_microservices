@@ -18,7 +18,8 @@ const PlaceOrder = () => {
   const [phone, setPhone] = useState('');
   const [street, setStreet] = useState('');
 
-  const { navigate, updateQuantity } = useContext(ShopContext);
+  const { navigate, updateQuantity, backEndURL } = useContext(ShopContext);
+
 
   // Download list of provinces/cities
   useEffect(() => {
@@ -98,7 +99,7 @@ const PlaceOrder = () => {
         isDefault: true,
       };
 
-      axios.post('http://localhost:3003/account/profile/address', addressData, {
+      axios.post(`${backEndURL.backendUrl}/account/profile/address`, addressData, {
         headers: {
           Authorization: `Bearer ${token}`, // Attach the token to the headers
         },

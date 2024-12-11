@@ -1,35 +1,37 @@
-import { useContext, useEffect, useState } from "react";
-import { ShopContext } from "../context/ShopContext";
-import Title from "../components/Title";
-import axios from "axios";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
-const Orders = () => {
-  const { currency } = useContext(ShopContext);
+const OrderPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
+  const [productDetails, setProductDetails] = useState({}); // Cache for product details
 
-  // Fetch orders based on date when component mounts
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem('token');
+
         if (!token) {
-          setError("No authorization token found");
+          setError('Authorization token is missing.');
           return;
         }
 
-        const response = await axios.get("http://localhost:3003/orders/user", {
+        const response = await axios.get('http://localhost:3003/orders/user', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
 
-        setOrders(response.data.orders); // Assuming the response contains a list of orders
+        // Sort orders by date (descending)
+        const sortedOrders = response.data.sort((a, b) =>
+          new Date(b.createdAt) - new Date(a.createdAt)
+        );
+
+        setOrders(sortedOrders);
+        setLoading(false);
       } catch (err) {
-        console.error("Error fetching orders:", err);
-        setError("Failed to fetch orders.");
-      } finally {
+        setError('Error fetching orders: ' + err.message);
         setLoading(false);
       }
     };
@@ -37,16 +39,37 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
-  // Handle cancel order
-  const cancelOrder = async (orderId) => {
+  const fetchProductDetails = async (productId) => {
     try {
-      const token = localStorage.getItem("authToken");
+      if (productDetails[productId]) {
+        return productDetails[productId];
+      }
+
+      const response = await axios.get(`http://localhost:3003/products/${productId}`);
+      const details = response.data.data;
+
+      setProductDetails((prevState) => ({
+        ...prevState,
+        [productId]: details,
+      }));
+
+      return details;
+    } catch (err) {
+      console.error('Error fetching product details:', err);
+      return { productName: 'Unknown Product', imageUrl: '' };
+    }
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    try {
+      const token = localStorage.getItem('token');
+
       if (!token) {
-        setError("No authorization token found");
+        setError('Authorization token is missing.');
         return;
       }
 
-      const response = await axios.post(
+      await axios.patch(
         `http://localhost:3003/orders/${orderId}/cancel`,
         {},
         {
@@ -56,84 +79,92 @@ const Orders = () => {
         }
       );
 
-      // Update the orders list with the cancelled order
-      const updatedOrders = orders.map((order) =>
-        order._id === orderId ? { ...order, status: "Cancelled" } : order
+      // Update the status immediately after successful cancellation
+      setOrders((prevOrders) =>
+        prevOrders.map((order) =>
+          order._id === orderId ? { ...order, status: 'cancelled' } : order
+        )
       );
-      setOrders(updatedOrders);
-
-      alert("Order has been cancelled.");
     } catch (err) {
-      console.error("Error cancelling order:", err);
-      setError("Failed to cancel the order.");
+      setError('Error canceling order: ' + err.message);
     }
   };
 
   if (loading) {
-    return <div>Loading orders...</div>;
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div>{error}</div>;
   }
 
   return (
-    <div className="border-t pt-16">
-      <div className="text-2xl">
-        <Title text1="MY " text2="ORDERS" />
-      </div>
+    <div className="container mx-auto my-8 px-4">
+      <h1 className="text-2xl font-semibold text-center mb-6">User Orders</h1>
 
-      <div>
-        {orders.length > 0 ? (
-          orders.map((order, index) => (
-            <div
-              key={order._id}
-              className="py-4 border-t border-b text-gray-700 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
-            >
-              <div className="flex items-start gap-6 text-sm">
-                <img
-                  src={order.items[0]?.image || "/default-image.jpg"}
-                  alt={order.items[0]?.name}
-                  className="w-16 sm:w-20"
-                />
-                <div>
-                  <p className="sm:text-base font-medium">{order.items[0]?.name}</p>
-                  <div className="flex items-center gap-3 mt-2 text-base text-gray-700">
-                    <p className="text-lg">{currency}{order.items[0]?.price}</p>
-                    <p>Quantity: {order.items[0]?.quantity}</p>
-                  </div>
-                  <p className="mt-2">
-                    Date:{" "}
-                    <span className="text-gray-400">{new Date(order.date).toLocaleDateString()}</span>
-                  </p>
-                </div>
-              </div>
-              <div className="md:w-1/2 flex justify-between">
-                <div className="flex items-center gap-2">
-                  <p
-                    className={`min-w-2 h-2 rounded-full ${
-                      order.status === "Cancelled" ? "bg-red-500" : "bg-green-500"
-                    }`}
-                  ></p>
-                  <p className="text-sm md:text-base">{order.status}</p>
-                </div>
-                {order.status !== "Cancelled" && (
-                  <button
-                    className="border px-4 py-2 text-sm font-medium rounded-sm"
-                    onClick={() => cancelOrder(order._id)}
-                  >
-                    Cancel Order
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
-        ) : (
-          <p>No orders found.</p>
-        )}
-      </div>
+      {orders.map((order) => (
+        <div key={order._id} className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">
+            Order ID: {order._id} -{' '}
+            {new Date(order.createdAt).toLocaleString()}
+          </h2>
+
+          <table className="min-w-full table-auto border-collapse border border-gray-200">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-4 py-2 text-left">Product Name</th>
+                <th className="px-4 py-2 text-left">Quantity</th>
+                <th className="px-4 py-2 text-left">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.products.map((productId, index) => {
+                const details = productDetails[productId];
+
+                if (!details) {
+                  fetchProductDetails(productId); // Fetch product details if not in cache
+                  return (
+                    <tr key={`${order._id}-${productId}`}>
+                      <td className="px-4 py-2">Loading...</td>
+                      <td className="px-4 py-2">-</td>
+                      <td className="px-4 py-2">-</td>
+                    </tr>
+                  );
+                }
+                return (
+                  <tr key={`${order._id}-${productId}`}>
+                    <td className="px-4 py-2">{details.productName}</td>
+                    <td className="px-4 py-2">{order.quantities[index]}</td>
+                    <td className="px-4 py-2">${order.totalPrice}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+
+          <div className="mt-4 flex justify-between items-center">
+            <span>Status: {order.status}</span>
+            <span>Total: ${order.totalPrice}</span>
+            {/* Show cancel button only if the status is not cancelled or delivered */}
+            {order.status !== 'canceled' && order.status !== 'delivered' && (
+              <button
+                onClick={() => handleCancelOrder(order._id)}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
+              >
+                Cancel Order
+              </button>
+            )}
+            {order.status === 'cancelled' && (
+              <span className="text-gray-500">Cancelled</span>
+            )}
+            {order.status === 'delivered' && (
+              <span className="text-green-500">Delivered</span>
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };
 
-export default Orders;
+export default OrderPage;

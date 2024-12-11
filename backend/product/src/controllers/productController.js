@@ -2,7 +2,6 @@ const ProductService = require('../services/productService');
 const messageBroker = require("../utils/messageBroker");
 const uuid = require('uuid');
 const uploadFile = require('../utils/uploadFile');
-const sendEmail = require('../utils/sendEmail');
 
 class ProductController {
 

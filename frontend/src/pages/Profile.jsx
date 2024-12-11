@@ -11,6 +11,7 @@ const ProfileForm = () => {
     email: '',
     phoneNumber: '',
     profilePicture: null,
+    addresses: [], // Initialize as an empty array
   });
 
   const [initialData, setInitialData] = useState(null); // Store initial data for comparison
@@ -35,6 +36,7 @@ const ProfileForm = () => {
           email: response.data.message.email,
           phoneNumber: response.data.message.phoneNumber,
           profilePicture: response.data.message.profilePicture,
+          addresses: response.data.message.addresses, // Fetch addresses
         };
 
         setProfileData(fetchedData);
@@ -50,6 +52,32 @@ const ProfileForm = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProfileData((prev) => ({ ...prev, [name]: value }));
+  };
+
+
+  const handleDeleteAddress = async (index) => {
+    try {
+      // Call API to delete the address (use the address ID or index if necessary)
+      const addressToDelete = profileData.addresses[index];
+      
+      const response = await axios.delete(
+        `${backendUrl.backendUrl}/account/profile/address/${addressToDelete._id}`, // Adjust API URL and use actual address ID
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+  
+      // Remove address from state
+      const updatedAddresses = profileData.addresses.filter((_, i) => i !== index);
+      setProfileData((prevData) => ({ ...prevData, addresses: updatedAddresses }));
+  
+      toast.success("Address deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting address:", error);
+      toast.error("An error occurred while deleting the address.");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -174,6 +202,32 @@ const ProfileForm = () => {
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-indigo-200"
         />
       </div>
+
+      {/* Addresses */}
+      <div className="mb-6">
+        <h3 className="text-xl font-semibold text-gray-800">Your Addresses</h3>
+        <div className="mt-4">
+          {profileData.addresses.map((address, index) => (
+            <div key={index} className="border-b pb-4 mb-4">
+              <p className="font-semibold">{address.name}</p>
+              <p>{address.street}, {address.city}, {address.district}, {address.ward}</p>
+              <p>Phone: {address.phoneNumber}</p>
+              <p className={`text-sm ${address.isDefault ? 'text-green-500' : 'text-gray-500'}`}>
+                {address.isDefault ? 'Default Address' : 'Not Default'}
+              </p>
+
+              {/* Delete Button */}
+              <button
+                onClick={() => handleDeleteAddress(index)} // Call delete function
+                className="text-red-600 hover:text-red-800 mt-2"
+              >
+                Delete Address
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
 
       {/* Change Password */}
       <div className="mb-4 text-center">
