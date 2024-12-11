@@ -8,29 +8,28 @@ class UserService {
     }
 
     async createUser(user) {
-        let {email, phone, username, password, role} = user
+        let {email, phone, name, addresses } = user
 
-        const isExistEmail = await this.UserRepository.getUserByEmail(email); 
-        
+        if (!email && !phone) {
+            return {success : false , message : "Email or phone number is required"}
+        }
+
+        const isExistEmail = await this.UserRepository.getUserByEmail(email);
+
         if (isExistEmail) {
-            return {success: false , message: 'Email existed'}
+            return {success : false , message : "Email existed"}
         }
 
         const isExistPhone = await this.UserRepository.getUserByPhoneNum(phone);
 
         if (isExistPhone) {
-            return {success: false , message : 'Phone number existed'}
+            return {success : false , message : "Phone number existed"}
         }
 
-        if (!username) {
-            username = await generateUsername()
+        const newUser = {email, phone, name, addresses, username: await generateUsername()};
 
-        }
-        if (!password) {
-            const newUser = await this.UserRepository.createUser({email, phoneNumber: phone, username})
-        }
+        await this.UserRepository.createUser(newUser);
 
-        const newUser = await this.UserRepository.createUser({email, phoneNumber: phone, username, password, role})
         
 
         return {success: true , message : newUser};

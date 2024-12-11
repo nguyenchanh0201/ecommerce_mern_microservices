@@ -264,19 +264,7 @@ class ProductController {
         }
     }
 
-    // async updateStock(req, res, next) {
-    //     try {
-    //         const {id} = req.params;
-    //         const {stock} = req.body;
-    //         const result = await this.ProductService.updateStock(id, stock);
-    //         if (!result.success) {
-    //             return res.status(400).json(result);
-    //         }
-    //         res.status(200).json(result);
-    //     } catch(err) {
-    //         next(err);
-    //     }
-    // }
+    
 
     async createOrder(req, res, next) {
         try {
@@ -292,10 +280,18 @@ class ProductController {
     
             // Fetch product details by IDs
             const products = await this.ProductService.getProductsByIds(ids);
+
+               
     
             if (!products.success) {
                 return res.status(400).json(products);
             }
+
+            products.data.forEach(async (product, index) => {
+                product.stock -= quantities[index];
+
+                await this.ProductService.save(product);
+            }); 
     
             // Generate a unique order ID
             const orderId = uuid.v4();

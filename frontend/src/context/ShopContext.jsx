@@ -133,6 +133,8 @@ const ShopContextProvider = ({ children }) => {
       alert(error.message || "Failed to apply coupon.");
     }
   };
+
+
   
 
   const value = {

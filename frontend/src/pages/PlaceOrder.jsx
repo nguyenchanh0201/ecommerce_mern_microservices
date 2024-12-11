@@ -15,10 +15,10 @@ const PlaceOrder = () => {
   // Customer information state
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [street, setStreet] = useState('');
 
-  const { navigate } = useContext(ShopContext);
+  const { navigate, updateQuantity } = useContext(ShopContext);
 
   // Download list of provinces/cities
   useEffect(() => {
@@ -62,58 +62,47 @@ const PlaceOrder = () => {
   }, [selectedDistrict]);
 
   // Handle form submission to place the order
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
+    const cartItems = JSON.parse(localStorage.getItem('cartItems'));
+    const ids = Object.keys(cartItems);
+    const quantities = Object.values(cartItems);
+    
+    const total = localStorage.getItem('total');
+
     const orderData = {
-      customer: {
-        firstName,
-        lastName,
-        email,
-        phone,
-        address: {
-          city: selectedCity,
-          district: selectedDistrict,
-          ward: selectedWard,
-        },
-      },
-      paymentMethod: method,
-      cartTotal: 100, // Replace this with actual cart total calculation
+      ids,
+      quantities,
+      total,
+      
     };
 
+    // Step 1: Check if the token exists
+    const token = localStorage.getItem('token'); 
+    // Assuming the token is saved in localStorage
     
-    axios.post('http://localhost:3003/user', {
-      email,
-      phone,
-      name: `${firstName} ${lastName}`,
-      address: {
-        city: selectedCity,
-        district: selectedDistrict,
-        ward: selectedWard,
-      },
-    })
-    .then(response => {
-      console.log('User created successfully:', response.data);
+    
+    const city = cities.find((city) => city.code == selectedCity).name;
+    const district = districts.find((district) => district.code == selectedDistrict).name;
+    const ward = wards.find((ward) => ward.code == selectedWard).name;
 
-      // After user creation, get the token from localStorage (or context)
-      const token = localStorage.getItem('token'); // Assuming the token is saved in localStorage
 
-      if (token) {
-        // Prepare address data to be added to the user's profile
-        const addressData = {
-          name: `${firstName} ${lastName}`,
-          street: 'Tran Van On', // You can customize this if you want an input for the street.
-          city: selectedCity,
-          district: selectedDistrict,
-          ward: selectedWard,
-          phoneNumber: phone,
-          isDefault: true,
-        };
+    if (token) {
+      // Step 2: Token exists, update user's address profile
+      const addressData = {
+        name: `${firstName} ${lastName}`,
+        street: street, // Customizable street address
+        city: city,
+        district: district,
+        ward: ward,
+        phoneNumber: phone,
+        isDefault: true,
+      };
 
-        // Send the address to update the user's profile via POST method
-        axios.post('http://localhost:3003/account/profile/address', addressData, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Attach the token to the headers
-          },
-        })
+      axios.post('http://localhost:3003/account/profile/address', addressData, {
+        headers: {
+          Authorization: `Bearer ${token}`, // Attach the token to the headers
+        },
+      })
         .then(response => {
           console.log('Address added successfully:', response.data);
           // After address update, navigate to the orders page
@@ -122,16 +111,32 @@ const PlaceOrder = () => {
         .catch(error => {
           console.error('Error adding address:', error);
         });
-      } else {
-        console.error('No token found, unable to update address.');
-      }
-    })
-    .catch(error => {
-      console.error('Error creating user:', error);
-    });
 
-    // Send orderData to your backend for placing the order (you can send it to a different endpoint if needed)
-    console.log('Placing order with data:', orderData);
+
+        try {
+          const response = await axios.post('http://localhost:3003/products/buy', orderData, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Attach the Bearer token
+              'Content-Type': 'application/json', // Ensure proper content type
+            },
+          });
+          localStorage.removeItem('cartItems');
+          localStorage.removeItem('total');
+          console.log(cartItems);
+          //updateQuantity
+          
+        } catch (error) {
+          console.error('Error placing order:', error);
+        }
+      
+        
+
+    } else {
+      navigate('/login'); 
+    }
+
+    // Step 4: Send orderData to your backend for placing the order (you can send it to a different endpoint if needed)
+    
   };
 
   return (
@@ -157,12 +162,20 @@ const PlaceOrder = () => {
           value={lastName}
           onChange={(e) => setLastName(e.target.value)}
         />
+
         <input
           className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-          type="email"
-          placeholder="Email address"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="number"
+          placeholder="Phone number"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
+        <input
+          className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
+          type="text"
+          placeholder="Street"
+          value={street}
+          onChange={(e) => setStreet(e.target.value)}
         />
 
         {/* Dropdown Province/City */}
@@ -209,19 +222,13 @@ const PlaceOrder = () => {
           ))}
         </select>
 
-        <input
-          className="border border-gray-300 rounded py-1.5 px-3.5 w-full"
-          type="number"
-          placeholder="Phone number"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
+
       </div>
 
       {/* Right Side */}
       <div className="mt-8">
         <div className="mt-8 min-w-80">
-          
+
         </div>
         <div className="mt-12">
           <Title text1={'PAYMENT '} text2={'METHOD'} />

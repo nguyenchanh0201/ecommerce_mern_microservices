@@ -15,7 +15,7 @@ const Navbar = () => {
   };
 
   const handleProfileClick = () => {
-    
+
     if (!token) {
       navigate('/login');
       return;
@@ -87,9 +87,10 @@ const Navbar = () => {
         <Link to="/cart" className="relative">
           <img src={assets.cart_icon} className="w-5 min-w-5" alt=" " />
           <div className="absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-red-600 text-white aspect-square rounded-full text-[8px]">
-            {getCartCount()}
+            {localStorage.getItem('cartItems') ? getCartCount() : 0}
           </div>
         </Link>
+
         <img
           onClick={() => setVisible(true)}
           src={assets.menu_icon}
@@ -100,9 +101,8 @@ const Navbar = () => {
 
       {/* Sidebar menu for small screens */}
       <div
-        className={`absolute top-0 right-0 bottom-0 overflow-hidden bg-white transition-all ${
-          visible ? 'w-full' : 'w-0'
-        }`}
+        className={`absolute top-0 right-0 bottom-0 overflow-hidden bg-white transition-all ${visible ? 'w-full' : 'w-0'
+          }`}
       >
         <div className="flex flex-col text-gray-600 ">
           <div
