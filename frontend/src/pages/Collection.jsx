@@ -17,30 +17,35 @@ const Collection = () => {
   const backEndURL = useContext(ShopContext);
   const navigate = useNavigate();
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1); // Trang hiện tại
+  const [totalPages, setTotalPages] = useState(1); // Tổng số trang
+  const [itemsPerPage] = useState(5); // Số sản phẩm trên mỗi trang
 
-useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      const response = await axios.get(`${backEndURL.backendUrl}/products`);
-      console.log(response.data); // Log the entire response to check its structure
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(
+          `${backEndURL.backendUrl}/products/page/?page=${currentPage}&limit=${itemsPerPage}`
+        );
 
-      // Assuming the response data structure contains a `data` property with an array of products
-      if (response.data && response.data.data && Array.isArray(response.data.data)) {
-        setProducts(response.data.data); // Set products to the array of products inside the `data` property
-      } else {
-        throw new Error("Invalid response format: No 'data' array found.");
+        // Set sản phẩm và tổng số trang từ API response
+        if (response.data && response.data.data) {
+          setProducts(response.data.data.docs);
+          setTotalPages(response.data.data.totalPages || 1); // Dùng tổng số trang nếu có
+        } else {
+          throw new Error("Invalid response format: Missing 'products' or 'totalPages'.");
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error.message);
+        alert("Failed to fetch products. Please try again later.");
       }
-    } catch (error) {
-      console.error("Error fetching products:", error.message);
-      alert("Failed to fetch products. Please try again later.");
-    }
-  };
+    };
 
-  fetchProducts();
-}, [backEndURL]);
+    fetchProducts();
+  }, [backEndURL, currentPage]);
 
-
-  // Handle category filter toggle
+  // Các bộ lọc
   const toggleCategory = (e) => {
     const value = e.target.value;
     setCategory((prev) =>
@@ -50,7 +55,6 @@ useEffect(() => {
     );
   };
 
-  // Handle brand filter toggle
   const toggleBrand = (e) => {
     const value = e.target.value;
     setBrand((prev) =>
@@ -60,35 +64,30 @@ useEffect(() => {
     );
   };
 
-  // Apply filters to the product list
   const applyFilter = () => {
     let productsCopy = products.slice();
 
-    // Filter by search
     if (showSearch && search) {
       productsCopy = productsCopy.filter((item) =>
         item.productName.toLowerCase().includes(search.toLowerCase())
       );
     }
 
-    // Filter by category
     if (category.length > 0) {
       productsCopy = productsCopy.filter((product) =>
         category.includes(product.category)
       );
     }
 
-    // Filter by brand (previously subcategory)
     if (brand.length > 0) {
-      productsCopy = productsCopy.filter(
-        (product) => brand.includes(product.brand) // Change to item.brand
+      productsCopy = productsCopy.filter((product) =>
+        brand.includes(product.brand)
       );
     }
 
     return productsCopy;
   };
 
-  // Sort products based on the selected sort type
   const sortProducts = (productsCopy) => {
     switch (sortType) {
       case "low-high":
@@ -100,17 +99,23 @@ useEffect(() => {
     }
   };
 
-  // Effect to apply filter and sort when dependencies change
   useEffect(() => {
     let filteredProducts = applyFilter();
     filteredProducts = sortProducts(filteredProducts);
     setFilterProducts(filteredProducts);
   }, [category, brand, sortType, products, search, showSearch]);
 
-  // Handle product click and navigate to product detail
+  // Xử lý click vào sản phẩm
   const handleProductClick = (id) => {
     navigate(`/product/${id}`);
     window.scrollTo(0, 0);
+  };
+
+  // Xử lý chuyển trang
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
   };
 
   return (
@@ -136,31 +141,13 @@ useEffect(() => {
           <p className="mb-3 text-sm font-medium">CATEGORIES</p>
           <div className="flex flex-col gap-2 text-sm font-light text-gray-700">
             <p className="flex gap-2">
-              <input
-                className="w-3"
-                type="checkbox"
-                value="Laptop"
-                onChange={toggleCategory}
-              />
-              Laptop
+              <input type="checkbox" value="Laptop" onChange={toggleCategory} /> Laptop
             </p>
             <p className="flex gap-2">
-              <input
-                className="w-3"
-                type="checkbox"
-                value="Gaming"
-                onChange={toggleCategory}
-              />
-              Laptop Gaming
+              <input type="checkbox" value="Gaming" onChange={toggleCategory} /> Laptop Gaming
             </p>
             <p className="flex gap-2">
-              <input
-                className="w-3"
-                type="checkbox"
-                value="Graphics"
-                onChange={toggleCategory}
-              />
-              Laptop Graphic
+              <input type="checkbox" value="Graphics" onChange={toggleCategory} /> Laptop Graphic
             </p>
           </div>
         </div>
@@ -172,40 +159,16 @@ useEffect(() => {
           <p className="mb-3 text-sm font-medium">BRAND</p>
           <div className="flex flex-col gap-2 text-sm font-light text-gray-700">
             <p className="flex gap-2">
-              <input
-                className="w-3"
-                type="checkbox"
-                value="Asus"
-                onChange={toggleBrand}
-              />
-              Asus
+              <input type="checkbox" value="Asus" onChange={toggleBrand} /> Asus
             </p>
             <p className="flex gap-2">
-              <input
-                className="w-3"
-                type="checkbox"
-                value="MSI"
-                onChange={toggleBrand}
-              />
-              MSI
+              <input type="checkbox" value="MSI" onChange={toggleBrand} /> MSI
             </p>
             <p className="flex gap-2">
-              <input
-                className="w-3"
-                type="checkbox"
-                value="Lenovo"
-                onChange={toggleBrand}
-              />
-              Lenovo
+              <input type="checkbox" value="Lenovo" onChange={toggleBrand} /> Lenovo
             </p>
             <p className="flex gap-2">
-              <input
-                className="w-3"
-                type="checkbox"
-                value="Dell"
-                onChange={toggleBrand}
-              />
-              Dell
+              <input type="checkbox" value="Dell" onChange={toggleBrand} /> Dell
             </p>
           </div>
         </div>
@@ -227,20 +190,69 @@ useEffect(() => {
 
         {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {filterProducts.map((product) => (
-            <div
-              key={product._id}
-              className="transform transition-transform duration-300 hover:scale-105"
-              onClick={() => handleProductClick(product._id)} // Add click handler
-            >
-              <ProductItems
-                id={product._id}
-                image={`${backEndURL.backendUrl}/products/${product.imageURL}`} // Use `imageURL` for the image
-                name={product.productName} // Use `productName` for the name
-                price={product.price} // Use `price` for the price
-              />
-            </div>
-          ))}
+          {filterProducts.map((product) => {
+            // Kiểm tra xem sản phẩm có đầy đủ dữ liệu không
+            if (!product._id || !product.productName || !product.price || !product.imageURL) {
+              console.warn("Invalid product data:", product);
+              return null;
+            }
+
+            return (
+              <div
+                key={product._id}
+                className="transform transition-transform duration-300 hover:scale-105"
+                onClick={() => handleProductClick(product._id)}
+              >
+                <ProductItems
+                  id={product._id}
+                  image={`${backEndURL.backendUrl}/products/${product.imageURL}`}
+                  name={product.productName}
+                  price={product.price}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Pagination */}
+        <div className="flex justify-center mt-6">
+          <nav>
+            <ul className="pagination flex gap-2">
+              <li
+                className={`page-item ${currentPage === 1 ? "disabled" : ""}`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                >
+                  Prev
+                </button>
+              </li>
+              {[...Array(totalPages).keys()].map((pageNumber) => (
+                <li
+                  key={pageNumber}
+                  className={`page-item ${currentPage === pageNumber + 1 ? "active" : ""}`}
+                >
+                  <button
+                    className="page-link"
+                    onClick={() => handlePageChange(pageNumber + 1)}
+                  >
+                    {pageNumber + 1}
+                  </button>
+                </li>
+              ))}
+              <li
+                className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
+              >
+                <button
+                  className="page-link"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                >
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
       </div>
     </div>
