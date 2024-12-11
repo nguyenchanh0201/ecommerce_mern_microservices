@@ -41,7 +41,6 @@ const ProfileForm = () => {
         setInitialData(fetchedData); // Save fetched data as initial data
       } catch (error) {
         console.error("Error fetching profile data:", error);
-        toast.error("An error occurred while fetching the profile.");
       }
     };
 
@@ -72,7 +71,7 @@ const ProfileForm = () => {
 
     try {
       // Update profile data via API
-      console.log(updatedFields)
+      console.log(updatedFields);
       const response = await axios.put(
         `${backendUrl.backendUrl}/account/profile`,
         updatedFields,
@@ -174,6 +173,16 @@ const ProfileForm = () => {
           onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:ring-indigo-200"
         />
+      </div>
+
+      {/* Change Password */}
+      <div className="mb-4 text-center">
+        <p
+          onClick={() => window.location.href = "/change-password"}
+          className="text-blue-600 underline cursor-pointer"
+        >
+          Change your password
+        </p>
       </div>
 
       {/* Submit Button */}

@@ -51,7 +51,7 @@ const Login = () => {
         }
       } else {
         console.error("Error:", error.message);
-        toast.error("An error occurred. Please try again.");
+        
       }
     }
   };
@@ -136,6 +136,9 @@ const Login = () => {
       <div className="w-full flex justify-between text-sm mt-[-8px]">
         <p onClick={() => navigate("/signup")} className="cursor-pointer">
           Do not have an account? Sign Up
+        </p>
+        <p onClick={() => navigate("/reset-password")} className="cursor-pointer text-blue-600">
+          Forgot your password?
         </p>
       </div>
       <button type="submit" className="w-full py-2 bg-gray-800 text-white">
