@@ -1,0 +1,108 @@
+version: "3.8"
+
+services:
+  # RabbitMQ service
+  rabbitmq:
+    image: "rabbitmq:management"
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"  # RabbitMQ management UI
+    networks:
+      - app-network
+
+  # API Gateway service
+  api-gateway:
+    build:
+      context: ./backend/api-gateway
+    ports:
+      - "3003:3003"
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
+
+  # Products service
+  products:
+    build:
+      context: ./backend/product
+    ports:
+      - "3001:3001"
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MONGODB_AUTH_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_users?retryWrites=true&w=majority&appName=database-courses
+      - JWT_SECRET=ecommerce-expressjs
+      - MONGODB_PRODUCT_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_products?retryWrites=true&w=majority&appName=database-courses
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
+
+  # Auth service
+  auth:
+    build:
+      context: ./backend/auth
+    ports:
+      - "3000:3000"
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MONGODB_AUTH_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_users?retryWrites=true&w=majority&appName=database-courses
+      - JWT_SECRET=ecommerce-expressjs
+      - USER_EMAIL =cgtminer@gmail.com
+      - PASSWORD =cmbwcbzbypxhmucl
+      - FACEBOOK_CLIENT_ID=1138124344682241
+      - FACEBOOK_CLIENT_SECRET=2a7e35a611647bc280c6da1ee559d8c4
+      - FACEBOOK_CALLBACK_URL=http://auth:3000/auth/facebook/callback
+
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
+
+  # Orders service
+  orders:
+    build:
+      context: ./backend/order
+    ports:
+      - "3002:3002"
+    environment:
+      - RABBITMQ_URL=amqp://rabbitmq:5672
+      - MONGODB_AUTH_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_users?retryWrites=true&w=majority&appName=database-courses
+      - JWT_SECRET=ecommerce-expressjs
+      - MONGODB_PRODUCT_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_products?retryWrites=true&w=majority&appName=database-courses
+      - MONGODB_ORDER_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_orders?retryWrites=true&w=majority&appName=database-courses
+
+    depends_on:
+      - rabbitmq
+    networks:
+      - app-network
+
+  # Frontend (User-facing) service
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_BACKEND_URL = 'http://localhost:3003'
+    depends_on:
+      - api-gateway
+    networks:
+      - app-network
+
+  # Admin (Admin-facing) service
+  admin:
+    build:
+      context: ./admin  # Separate folder for the Admin frontend
+    ports:
+      - "3030:3030"  # Admin frontend runs on port 3030
+    depends_on:
+      - api-gateway
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -18,7 +18,8 @@ const PlaceOrder = () => {
   const [phone, setPhone] = useState('');
   const [street, setStreet] = useState('');
 
-  const { navigate, updateQuantity, backEndURL } = useContext(ShopContext);
+  const { navigate, updateQuantity } = useContext(ShopContext);
+  const backendUrl = useContext(ShopContext);
 
 
   // Download list of provinces/cities
@@ -85,7 +86,7 @@ const PlaceOrder = () => {
     const city = cities.find((city) => city.code == selectedCity).name;
     const district = districts.find((district) => district.code == selectedDistrict).name;
     const ward = wards.find((ward) => ward.code == selectedWard).name;
-
+    
 
     if (token) {
       // Step 2: Token exists, update user's address profile
@@ -98,8 +99,9 @@ const PlaceOrder = () => {
         phoneNumber: phone,
         isDefault: true,
       };
+      
 
-      axios.post(`${backEndURL.backendUrl}/account/profile/address`, addressData, {
+      axios.post(`${backendUrl.backendUrl}/account/profile/address`, addressData, {
         headers: {
           Authorization: `Bearer ${token}`, // Attach the token to the headers
         },
@@ -115,7 +117,7 @@ const PlaceOrder = () => {
 
 
         try {
-          const response = await axios.post('http://localhost:3003/products/buy', orderData, {
+          const response = await axios.post(`${backendUrl.backendUrl}/products/buy`, orderData, {
             headers: {
               Authorization: `Bearer ${token}`, // Attach the Bearer token
               'Content-Type': 'application/json', // Ensure proper content type

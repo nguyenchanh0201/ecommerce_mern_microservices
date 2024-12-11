@@ -11,9 +11,16 @@ app.use(morgan("dev"));
 
 // List of allowed origins
 const allowedOrigins = [
-  process.env.FRONTEND_URL, // Example: http://localhost:3000
-    process.env.ADMIN_URL
+  "http://localhost:5173", // Browser access to frontend
+  "http://localhost:3030", // Browser access to admin
+  process.env.FRONTEND_URL, // Docker service frontend URL
+  process.env.ADMIN_URL,    // Docker service admin URL
 ];
+
+
+const productURL = process.env.PRODUCT_URL; // Example: http://localhost:3001
+const orderURL = process.env.ORDER_URL;     // Example: http://localhost:3002
+const authURL = process.env.AUTH_URL;       // Example: http://localhost:3000
 
 // Configure CORS
 app.use(
@@ -34,17 +41,17 @@ app.use(
 
 // Route requests to the product service
 app.use("/products", (req, res) => {
-  proxy.web(req, res, { target: "http://localhost:3001" });
+  proxy.web(req, res, { target: productURL });
 });
 
 // Route requests to the order service
 app.use("/orders", (req, res) => {
-  proxy.web(req, res, { target: "http://localhost:3002" });
+  proxy.web(req, res, { target: orderURL });
 });
 
 // Route requests to the auth service
 app.use("/", (req, res) => {
-  proxy.web(req, res, { target: "http://localhost:3000" });
+  proxy.web(req, res, { target: authURL });
 });
 
 // Start the server

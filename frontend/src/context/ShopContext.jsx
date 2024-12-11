@@ -16,6 +16,7 @@ const ShopContextProvider = ({ children }) => {
   const [discount, setDiscount] = useState(0);
   const [token, setToken] = useState('');
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+ 
 
   // Load cartItems from localStorage on mount
   useEffect(() => {

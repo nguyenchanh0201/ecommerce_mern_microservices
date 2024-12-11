@@ -1,23 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import axios from 'axios';
+import { ShopContext } from "../context/ShopContext";
 
 const OrderPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [productDetails, setProductDetails] = useState({}); // Cache for product details
+  const backendUrl = useContext(ShopContext);
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const token = localStorage.getItem('token');
+        console.log(`${backendUrl.backendUrl}/orders/user`)
 
         if (!token) {
           setError('Authorization token is missing.');
           return;
         }
 
-        const response = await axios.get('http://localhost:3003/orders/user', {
+        const response = await axios.get(`${backendUrl.backendUrl}/orders/user`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -31,7 +34,7 @@ const OrderPage = () => {
         setOrders(sortedOrders);
         setLoading(false);
       } catch (err) {
-        setError('Error fetching orders: ' + err.message);
+        setError(err.response.data.message || 'No orders found.');
         setLoading(false);
       }
     };
@@ -45,7 +48,7 @@ const OrderPage = () => {
         return productDetails[productId];
       }
 
-      const response = await axios.get(`http://localhost:3003/products/${productId}`);
+      const response = await axios.get(`${backendUrl.backendUrl}/products/${productId}`);
       const details = response.data.data;
 
       setProductDetails((prevState) => ({
@@ -70,7 +73,7 @@ const OrderPage = () => {
       }
 
       await axios.patch(
-        `http://localhost:3003/orders/${orderId}/cancel`,
+        `${backendUrl.backendUrl}/orders/${orderId}/cancel`,
         {},
         {
           headers: {

@@ -4,11 +4,13 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
 
+
 const Login = () => {
-  const { backendUrl, token, setToken, navigate } = useContext(ShopContext);
+  const { backendUrl, token, setToken, navigate, facebookUrl } = useContext(ShopContext);
   const [usernameOrEmail, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setError] = useState("");
+
 
   // Check if the user is already logged in when component is mounted
   useEffect(() => {
@@ -65,7 +67,7 @@ const Login = () => {
     const top = (window.screen.height - height) / 2; // Use `screen.height`
   
     const popup = window.open(
-      'http://localhost:3000/auth/facebook',
+      `http://localhost:3000/auth/facebook`,
       'Facebook Login',
       `width=${width},height=${height},top=${top},left=${left},scrollbars=no,resizable=no`
     );
