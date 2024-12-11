@@ -289,6 +289,7 @@ class ProductController {
 
             products.data.forEach(async (product, index) => {
                 product.stock -= quantities[index];
+                product.totalSold += quantities[index];
 
                 await this.ProductService.save(product);
             }); 

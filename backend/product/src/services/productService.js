@@ -133,6 +133,10 @@ class ProductService {
     }
 
 
+    async save(product) {
+        return await this.ProductRepository.save(product);
+    }
+
     async addProductReview(productId, review) {
         const product = await this.ProductRepository.getProductById(productId);
 

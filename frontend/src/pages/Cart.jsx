@@ -21,12 +21,13 @@ const Cart = () => {
 
   useEffect(() => {
     // Check if cartItems exist in localStorage
-    const storedCartItems = JSON.parse(localStorage.getItem("cartItems"));
+    const storedCartItems = JSON.parse(localStorage.getItem("cartItems")) || {};
+  
     if (!storedCartItems || Object.keys(storedCartItems).length === 0) {
       setCartData([]); // Set cart data to empty if cartItems doesn't exist or is empty
       return;
     }
-
+  
     // Fetch product details for each item in the cart
     const fetchCartData = async () => {
       try {
@@ -42,23 +43,22 @@ const Cart = () => {
               quantity: storedCartItems[productId], // Add quantity to product data
             };
           });
-
+  
         const products = await Promise.all(productPromises);
-        console.log(products);
         setCartData(products);
-
+  
         // Calculate the total amount dynamically
         const calculatedTotal = products.reduce((total, product) => {
           return total + product.price * product.quantity; // price * quantity for each item
         }, 0);
-
+  
         setTotalAmount(calculatedTotal); // Update total amount
       } catch (error) {
         console.error("Error fetching product details:", error);
         alert("Failed to load product data. Please try again later.");
       }
     };
-
+  
     fetchCartData();
   }, [cartItems, backEndURL]); // Re-fetch data whenever cartItems or backend URL changes
 
@@ -68,14 +68,8 @@ const Cart = () => {
     localStorage.setItem("total", total.toFixed(2)); // Save total to localStorage
   }, [totalAmount, delivery_fee, discount]); // Update whenever totalAmount, delivery_fee, or discount changes
 
-  const handleQuantityChange = (id, value) => {
-    if (value > 0) {
-      updateQuantity(id, value);
-    } else {
-      updateQuantity(id, 0); // If value < 1, remove product from cart
-    }
-    localStorage.setItem("cartItems", JSON.stringify(cartItems)); // Update localStorage
-  };
+  
+  
 
   return (
     <div className="border-t pt-14">
@@ -128,6 +122,7 @@ const Cart = () => {
                   value={item.quantity}
                   onChange={(e) =>
                     handleQuantityChange(item._id, parseInt(e.target.value))
+                    
                   }
                 />
                 <img
