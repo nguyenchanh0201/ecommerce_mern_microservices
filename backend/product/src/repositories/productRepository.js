@@ -1,5 +1,5 @@
 const Product = require('../models/product');
-const mongoosePaginate = require("mongoose-paginate-v2");
+
 
 class ProductRepository {
 
