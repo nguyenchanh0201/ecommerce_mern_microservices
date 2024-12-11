@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate, Link } from "react-router-dom";
 
 import ProductList from "./pages/ProductList";
 import OrdersList from "./pages/OrderList";
 import UsersList from "./pages/UserList";
 import Login from "./pages/LoginForm";
+import Coupon from "./pages/Coupon";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  
   return (
     <Router>
       <div>
@@ -45,6 +46,11 @@ const App = () => {
                   <li className="nav-item">
                     <Link className="nav-link" to="/users">
                       Users
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/coupon">
+                      Coupon
                     </Link>
                   </li>
                 </ul>
@@ -95,6 +101,13 @@ const App = () => {
             element={
               isAuthenticated ? <UsersList /> : <Navigate to="/login" replace />
             }
+          />
+          <Route 
+            path="/coupon" 
+            element={
+              isAuthenticated ? <Coupon/> : <Navigate to="/coupon" replace />
+              } 
+
           />
         </Routes>
       </div>

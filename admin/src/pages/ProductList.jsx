@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 
 const ProductList = () => {
@@ -100,7 +100,7 @@ const ProductList = () => {
   const handleEditProduct = async (e) => {
     e.preventDefault();
     if (!editingProduct) return;
-
+  
     const productData = {
       productName: newProduct.productName,
       category: newProduct.category,
@@ -114,7 +114,7 @@ const ProductList = () => {
       warranty: newProduct.warranty,
       return_policy: newProduct.return_policy,
     };
-
+  
     try {
       const response = await axios.put(
         `http://localhost:3003/products/${editingProduct._id}`,
@@ -125,7 +125,7 @@ const ProductList = () => {
           },
         }
       );
-
+  
       if (response.data.success) {
         setProducts((prevProducts) =>
           prevProducts.map((product) =>
@@ -143,6 +143,8 @@ const ProductList = () => {
       setError("Error updating product.");
     }
   };
+  
+  
 
   // Handle Delete Product
   const handleDeleteProduct = async (id) => {
@@ -407,14 +409,14 @@ const ProductList = () => {
             {editingProduct ? "Update Product" : "Add Product"}
           </button>
           {editingProduct && (
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={resetForm}
-            >
-              Cancel
-            </button>
-          )}
+      <button
+        type="button"
+        className="btn btn-secondary"
+        onClick={resetForm}
+      >
+        Cancel
+      </button>
+    )}
         </form>
       </div>
 
