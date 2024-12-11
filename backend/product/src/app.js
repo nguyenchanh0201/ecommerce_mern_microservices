@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const config = require("./config");
 const MessageBroker = require("./utils/messageBroker");
 const productsRoutes = require("./routes/productRoutes");
+const couponRoutes = require("./routes/couponRoutes");
 require("dotenv").config();
 const {errorHandler} = require('./middlewares');
 const morgan = require('morgan');
@@ -38,8 +39,10 @@ class App {
   }
 
   setRoutes() {
+    this.app.use('/coupons', couponRoutes);
     this.app.use("/", productsRoutes);
     this.app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+    
   }
 
   setupMessageBroker() {

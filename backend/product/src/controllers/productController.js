@@ -279,66 +279,72 @@ class ProductController {
     // }
 
     async createOrder(req, res, next) {
-
         try {
-
-            
-
-            const { ids } = req.body;
-            
+            const { ids, quantities, total } = req.body;
+    
+            // Validate that ids and quantities are arrays of the same length
+            if (!Array.isArray(ids) || !Array.isArray(quantities) || ids.length !== quantities.length) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid input: ids and quantities must be arrays of the same length."
+                });
+            }
+    
+            // Fetch product details by IDs
             const products = await this.ProductService.getProductsByIds(ids);
-
+    
             if (!products.success) {
                 return res.status(400).json(products);
             }
-           
-            const total = products.data.reduce((acc, product) => {
-                return acc + product.price;
-            }, 0);
-
+    
+            // Generate a unique order ID
             const orderId = uuid.v4();
+    
+            // Save order details to a temporary map with a "pending" status
             this.ordersMap.set(orderId, {
                 status: "pending",
-                products,
+                products: products.data,
+                quantities,
                 userId: req.user._id,
-                total: total
+                total, // Use total directly from the request
             });
-
+    
+            // Publish the order message to the "orders" queue
             await messageBroker.publishMessage("orders", {
                 products: ids,
+                quantities,
                 userId: req.user._id,
                 orderId,
-                total: total,
-            })
-
+                total, // Use total directly from the request
+            });
+    
+            // Consume messages from the "products" queue for order completion
             messageBroker.consumeMessage("products", (data) => {
                 const orderData = JSON.parse(JSON.stringify(data));
                 const { orderId } = orderData;
                 const order = this.ordersMap.get(orderId);
                 if (order) {
-                    // update the order in the map
-                    this.ordersMap.set(orderId, { ...order, ...orderData, status: 'completed' });
+                    // Update the order in the map with completed data
+                    this.ordersMap.set(orderId, { ...order, ...orderData, status: "completed" });
                     console.log("Updated order:", order);
                 }
             });
-
-            // Long polling until order is completed
+    
+            // Long polling until the order status is "completed"
             let order = this.ordersMap.get(orderId);
-            while (order.status !== 'completed') {
-                await new Promise(resolve => setTimeout(resolve, 1000)); // wait for 1 second before checking status again
+            while (order.status !== "completed") {
+                await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
                 order = this.ordersMap.get(orderId);
             }
-
-            // Once the order is marked as completed, return the complete order details
+    
+            // Once the order is completed, return the full order details
             return res.status(201).json(order);
-
-
-            // res.status(200).json({ success: true, data: { products: products.data, total } });
         } catch (err) {
             next(err);
         }
-
     }
+    
+    
 
     async getOrderStatus(req, res, next) {
         try {

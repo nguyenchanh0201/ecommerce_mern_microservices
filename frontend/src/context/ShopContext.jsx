@@ -20,6 +20,7 @@ const ShopContextProvider = ({ children }) => {
   // Load cartItems from localStorage on mount
   useEffect(() => {
     const savedCartItems = localStorage.getItem('cartItems');
+    
     if (savedCartItems) {
       setCartItems(JSON.parse(savedCartItems));
     }
@@ -99,31 +100,40 @@ const ShopContextProvider = ({ children }) => {
     return totalAmount || 0;
   };
 
-  const applyCoupon = (code) => {
-    const validCoupons = {
-      KIETCHANH: "20%", // Discount 20% 
-      KIET20: 20, // OFF 20
-      CHANH20: 20, // OFF 20
-    };
-
-    if (validCoupons[code]) {
-      setCouponCode(code);
-
-      if (typeof validCoupons[code] === "string" && validCoupons[code].endsWith("%")) {
-        const percent = parseFloat(validCoupons[code].replace("%", ""));
-        const subtotal = getCartAmount();
-        setDiscount((subtotal * percent) / 100);
-      } else {
-        setDiscount(validCoupons[code]);
+  const applyCoupon = async (code) => {
+    try {
+      // Call the API to validate the coupon
+      const response = await fetch(`http://localhost:3003/products/coupons/code/${code}`);
+      
+      if (!response.ok) {
+        throw new Error("Invalid coupon code or server error.");
       }
-
-      alert(`Coupon applied! Discount: ${validCoupons[code]}`);
-    } else {
+  
+      const data = await response.json(); // Parse the response JSON
+      const { discount } = data; // Extract the discount value from the response
+  
+      if (discount) {
+        setCouponCode(code);
+  
+        if (typeof discount === "string" && discount.endsWith("%")) {
+          const percent = parseFloat(discount.replace("%", ""));
+          const subtotal = getCartAmount();
+          setDiscount((subtotal * percent) / 100);
+        } else {
+          setDiscount(discount); // Apply a flat discount
+        }
+  
+        alert(`Coupon applied! Discount: ${discount}`);
+      } else {
+        throw new Error("Invalid discount received.");
+      }
+    } catch (error) {
       setCouponCode("");
       setDiscount(0);
-      alert("Invalid coupon code!");
+      alert(error.message || "Failed to apply coupon.");
     }
   };
+  
 
   const value = {
     products,

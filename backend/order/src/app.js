@@ -37,45 +37,63 @@ class App {
     console.log("Connecting to RabbitMQ...");
   
     setTimeout(async () => {
-      try {
-        const amqpServer = "amqp://localhost:5672";
-        const connection = await amqp.connect(amqpServer);
-        console.log("Connected to RabbitMQ");
-        const channel = await connection.createChannel();
-        await channel.assertQueue("orders");
+        try {
+            const amqpServer = "amqp://localhost:5672";
+            const connection = await amqp.connect(amqpServer);
+            console.log("Connected to RabbitMQ");
+            const channel = await connection.createChannel();
+            await channel.assertQueue("orders");
   
-        channel.consume("orders", async (data) => {
-          // Consume messages from the order queue on buy
-          console.log("Consuming ORDER service");
-          const { products, userId, orderId, total } = JSON.parse(data.content);
-          
+            channel.consume("orders", async (data) => {
+                try {
+                    // Consume messages from the order queue
+                    console.log("Consuming ORDER service");
+                    const { products, quantities, userId, orderId, total } = JSON.parse(data.content);
+
+                    // Validate data
+                    if (!Array.isArray(products) || !Array.isArray(quantities) || products.length !== quantities.length) {
+                        console.error("Invalid data: products and quantities must be arrays of the same length.");
+                        channel.nack(data); // Negative acknowledgment for invalid messages
+                        return;
+                    }
+
+                    // Create and save new order
+                    const newOrder = new Order({
+                        products,
+                        quantities, // Store the quantities as well
+                        userId,
+                        totalPrice: total, // Store total price
+                    });
+                    await newOrder.save();
+
+                    // Send ACK to the orders queue
+                    channel.ack(data);
+                    console.log("Order saved to DB and ACK sent to ORDER queue");
   
-          const newOrder = new Order({
-            products,
-            userId: userId,
-            totalPrice: total,
-          });
-  
-          // Save order to DB
-          await newOrder.save();
-  
-          // Send ACK to ORDER service
-          channel.ack(data);
-          console.log("Order saved to DB and ACK sent to ORDER queue");
-  
-          // Send fulfilled order to PRODUCTS service
-          // Include orderId in the message
-          const { user, products: savedProducts, totalPrice } = newOrder.toJSON();
-          channel.sendToQueue(
-            "products",
-            Buffer.from(JSON.stringify({ orderId, user, products: savedProducts, totalPrice }))
-          );
-        });
-      } catch (err) {
-        console.error("Failed to connect to RabbitMQ:", err.message);
-      }
-    }, 10000); // add a delay to wait for RabbitMQ to start in docker-compose
-  }
+                    // Send fulfilled order to PRODUCTS service
+                    const { userId: savedUser, products: savedProducts, quantities: savedQuantities, totalPrice } = newOrder.toJSON();
+                    channel.sendToQueue(
+                        "products",
+                        Buffer.from(JSON.stringify({
+                            orderId,
+                            userId: savedUser,
+                            products: savedProducts,
+                            quantities: savedQuantities, // Include quantities
+                            totalPrice,
+                        }))
+                    );
+                } catch (err) {
+                    console.error("Error processing order:", err.message);
+                    channel.nack(data); // Negative acknowledgment for processing errors
+                }
+            });
+        } catch (err) {
+            console.error("Failed to connect to RabbitMQ:", err.message);
+        }
+    }, 10000); // Add a delay to wait for RabbitMQ to start in Docker Compose
+}
+
+
 
   setMiddlewares() {
     this.app.use(express.json());

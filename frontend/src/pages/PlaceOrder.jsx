@@ -79,8 +79,8 @@ const PlaceOrder = () => {
       cartTotal: 100, // Replace this with actual cart total calculation
     };
 
-    // Create a new user via the backend API (localhost:3003/user)
-    axios.post('http://localhost:3003/account/profile/address', {
+    
+    axios.post('http://localhost:3003/user', {
       email,
       phone,
       name: `${firstName} ${lastName}`,

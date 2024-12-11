@@ -30,6 +30,7 @@ const Cart = () => {
           });
 
         const products = await Promise.all(productPromises);
+        console.log(products)
         setCartData(products);
 
         // Calculate the total amount dynamically
@@ -67,7 +68,7 @@ const Cart = () => {
       {cartData.length > 0 ? (
         cartData.map((item) => {
           // Check if image is available
-          const productImage = item.image && item.image.length > 0 ? item.image[0] : null;
+          const productImage = `${backEndURL.backendUrl}/products/${item.imageURL}`; 
 
           return (
             <div
@@ -140,10 +141,17 @@ const Cart = () => {
           />
           <div className="w-full text-end">
             <button
-              onClick={() => navigate("/place-order")}
+              onClick={() => {
+                if (totalAmount === 0) {
+                  navigate("/collection"); // Navigate to /collection if totalAmount is 0
+                } else {
+                  navigate("/place-order"); // Navigate to /place-order otherwise
+                }
+              }}
               className="bg-black text-white text-sm my-8 px-8 py-3"
             >
-              CHECKOUT
+              {totalAmount === 0 ? "BROWSE COLLECTION" : "CHECKOUT"}
+              
             </button>
           </div>
         </div>
