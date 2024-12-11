@@ -32,9 +32,9 @@ services:
       - "3001:3001"
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
-      - MONGODB_AUTH_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_users?retryWrites=true&w=majority&appName=database-courses
-      - JWT_SECRET=ecommerce-expressjs
-      - MONGODB_PRODUCT_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_products?retryWrites=true&w=majority&appName=database-courses
+      - MONGODB_AUTH_URI=
+      - JWT_SECRET=
+      - MONGODB_PRODUCT_URI=
     depends_on:
       - rabbitmq
     networks:
@@ -48,12 +48,12 @@ services:
       - "3000:3000"
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
-      - MONGODB_AUTH_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_users?retryWrites=true&w=majority&appName=database-courses
-      - JWT_SECRET=ecommerce-expressjs
-      - USER_EMAIL =cgtminer@gmail.com
-      - PASSWORD =cmbwcbzbypxhmucl
-      - FACEBOOK_CLIENT_ID=1138124344682241
-      - FACEBOOK_CLIENT_SECRET=2a7e35a611647bc280c6da1ee559d8c4
+      - MONGODB_AUTH_URI=
+      - JWT_SECRET=
+      - USER_EMAIL =
+      - PASSWORD =
+      - FACEBOOK_CLIENT_ID=
+      - FACEBOOK_CLIENT_SECRET=
       - FACEBOOK_CALLBACK_URL=http://auth:3000/auth/facebook/callback
 
     depends_on:
@@ -69,10 +69,10 @@ services:
       - "3002:3002"
     environment:
       - RABBITMQ_URL=amqp://rabbitmq:5672
-      - MONGODB_AUTH_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_users?retryWrites=true&w=majority&appName=database-courses
-      - JWT_SECRET=ecommerce-expressjs
-      - MONGODB_PRODUCT_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_products?retryWrites=true&w=majority&appName=database-courses
-      - MONGODB_ORDER_URI=mongodb+srv://jmmy123:Chanh123456789@database-courses.heel0.mongodb.net/ecommerce_orders?retryWrites=true&w=majority&appName=database-courses
+      - MONGODB_AUTH_URI=
+      - JWT_SECRET=
+      - MONGODB_PRODUCT_URI=
+      - MONGODB_ORDER_URI=
 
     depends_on:
       - rabbitmq
