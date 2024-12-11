@@ -42,8 +42,12 @@ class OrderService {
         return await Order.findByIdAndDelete(orderId);
     }
 
-    async updateOrder(orderId, products, userId, totalPrice) {
-        return await Order.findByIdAndUpdate(orderId, {products, userId, totalPrice}, {new: true});
+    async changeOrderStatus(orderId, status) {
+        return await Order.findByIdAndUpdate(orderId, {status: status}, {new: true});
+    }
+
+    async cancelOrder(orderId, userId) {
+        return await Order.findOneAndUpdate({_id: orderId, userId: userId}, {status: "canceled"}, {new: true});
     }
     
 }

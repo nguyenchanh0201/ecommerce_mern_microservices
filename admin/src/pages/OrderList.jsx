@@ -11,7 +11,20 @@ const OrdersList = () => {
     const fetchOrders = async () => {
       try {
         const response = await axios.get("http://localhost:3003/orders");
-        setOrders(response.data); // Assuming the response is the array of orders
+        const ordersWithProductNames = await Promise.all(
+          response.data.map(async (order) => {
+            const productNames = await Promise.all(
+              order.products.map(async (productId) => {
+                const productResponse = await axios.get(
+                  `http://localhost:3003/products/${productId}`
+                );
+                return productResponse.data.data.productName; // Assuming the API returns the product name
+              })
+            );
+            return { ...order, productNames }; // Include product names in the order
+          })
+        );
+        setOrders(ordersWithProductNames);
         setLoading(false);
       } catch (err) {
         setError("Failed to fetch orders");
@@ -36,6 +49,22 @@ const OrdersList = () => {
     }
   };
 
+  // Handle status change
+  const handleChangeStatus = async (id, newStatus) => {
+    try {
+      await axios.patch(`http://localhost:3003/orders/${id}`, {
+        status: newStatus,
+      });
+      setOrders(
+        orders.map((order) =>
+          order._id === id ? { ...order, status: newStatus } : order
+        )
+      );
+    } catch (err) {
+      setError("Error updating order status");
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
@@ -50,6 +79,7 @@ const OrdersList = () => {
             <th>Products</th>
             <th>Total Price ($)</th>
             <th>Created At</th>
+            <th>Status</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -58,9 +88,20 @@ const OrdersList = () => {
             <tr key={order._id}>
               <td>{index + 1}</td>
               <td>{order.userId}</td>
-              <td>{order.products.join(", ")}</td>
+              <td>{order.productNames.join(", ")}</td> {/* Show product names */}
               <td>{order.totalPrice}</td>
               <td>{new Date(order.createdAt).toLocaleString()}</td>
+              <td>
+                <select
+                  className="form-select form-select-sm"
+                  value={order.status}
+                  onChange={(e) => handleChangeStatus(order._id, e.target.value)}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="canceled">Canceled</option>
+                </select>
+              </td>
               <td>
                 <button
                   className="btn btn-danger btn-sm"

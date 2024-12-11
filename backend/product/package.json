@@ -18,6 +18,7 @@
     "mongoose": "^8.8.3",
     "mongoose-paginate-v2": "^1.8.5",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.16",
     "nodemon": "^3.1.7",
     "uuid": "^11.0.3"
   },

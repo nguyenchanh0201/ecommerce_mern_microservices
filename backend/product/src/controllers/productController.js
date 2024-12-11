@@ -2,6 +2,7 @@ const ProductService = require('../services/productService');
 const messageBroker = require("../utils/messageBroker");
 const uuid = require('uuid');
 const uploadFile = require('../utils/uploadFile');
+const sendEmail = require('../utils/sendEmail');
 
 class ProductController {
 
@@ -333,7 +334,12 @@ class ProductController {
                 await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second
                 order = this.ordersMap.get(orderId);
             }
-    
+            
+
+
+
+
+
             // Once the order is completed, return the full order details
             return res.status(201).json(order);
         } catch (err) {
